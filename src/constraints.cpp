@@ -38,6 +38,13 @@ void GetAngleConstraintDelta(
   const auto edge_r = glm::normalize(r-q);
   const auto edgelen_r = glm::length(r-q);
   const double angle = glm::angle(edge_l, edge_r);
+  if (glm::abs(angle-target_angle) < 0.01)
+  {
+    *dp = {0.0, 0.0};
+    *dq = {0.0, 0.0};
+    *dr = {0.0, 0.0};
+    return;
+  }
 
   const double dotprod = glm::dot(edge_l,edge_r);
   const auto l1 = (edge_r - dotprod*edge_l)/edgelen_l;
@@ -50,9 +57,9 @@ void GetAngleConstraintDelta(
   const double s =
     pw*glm::length2(l1) + qw*glm::length2(l1-r1) + rw*glm::length2(r1);
 
-  *dp = stiffness*0.5*pw*angle*l2/s;
-  *dq = stiffness*0.5*qw*angle*(r2-l2)/s;
-  *dr = -stiffness*0.5*rw*angle*r2/s;
+  *dp = stiffness*0.5*pw*(angle-target_angle)*l2/s;
+  *dq = stiffness*0.5*qw*(angle-target_angle)*(r2-l2)/s;
+  *dr = -stiffness*0.5*rw*(angle-target_angle)*r2/s;
 }
 
 }

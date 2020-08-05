@@ -15,6 +15,7 @@ class PbdSystem
 public:
   PbdSystem(int num_vertices);
   void Integrate(double dt);
+  void DampVelocity(double damping);
   void AddLengthConstraint(
       int idx1, int idx2, double target_len, int power);
   void AddAngleConstraint(

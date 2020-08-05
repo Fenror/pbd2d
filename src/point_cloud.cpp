@@ -124,3 +124,15 @@ glm::dvec2 PointCloud::GetCenterOfMass() const
 
   return center_of_mass;
 }
+
+glm::dvec2 PointCloud::GetMomentum() const
+{
+  glm::dvec2 momentum{0.0,0.0};
+
+  for (int i = 0; i < num_points_; ++i)
+    momentum += velocities_[i];
+
+  momentum /= num_points_;
+
+  return momentum;
+}

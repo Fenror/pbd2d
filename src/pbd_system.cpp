@@ -38,6 +38,15 @@ void PbdSystem::Integrate(double dt)
   HandleAngleConstraints(dt);
 }
 
+void PbdSystem::DampVelocity(double damping)
+{
+  const auto momentum = ds_->GetMomentum();
+  for (int i = 0; i < ds_->GetNumPoints(); ++i)
+  {
+    ds_->AddVelocity(i, damping*(momentum - ds_->GetVelocity(i)));
+  }
+}
+
 void PbdSystem::HandleLengthConstraints(double dt)
 {
   for (const auto& c : length_constraints_)

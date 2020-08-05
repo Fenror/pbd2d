@@ -1,5 +1,7 @@
 #include "pbd_factory.hpp"
 
+#include <glm/gtc/constants.hpp>
+
 
 namespace pbd
 {
@@ -31,6 +33,33 @@ std::unique_ptr<PbdSystem> MakeRod(
   }
 
   return rod;
+}
+
+std::unique_ptr<PbdSystem> MakeSquare(
+    double side_length, double stiffness)
+{
+  std::unique_ptr<PbdSystem> square =
+      std::make_unique<PbdSystem>(4);
+
+  const double angle = glm::half_pi<double>();
+  const int power = 1;
+
+  square->AddLengthConstraint(0,1,side_length,power);
+  square->AddLengthConstraint(1,2,side_length,power);
+  square->AddLengthConstraint(2,3,side_length,power);
+  square->AddLengthConstraint(3,0,side_length,power);
+
+  square->AddAngleConstraint(0,1,2,angle,stiffness,power);
+  square->AddAngleConstraint(1,2,3,angle,stiffness,power);
+  square->AddAngleConstraint(2,3,0,angle,stiffness,power);
+  square->AddAngleConstraint(3,0,1,angle,stiffness,power);
+
+  square->GetPointCloud()->SetPoint(0, {0.0, 0.0});
+  square->GetPointCloud()->SetPoint(1, {side_length, 0.0});
+  square->GetPointCloud()->SetPoint(2, {side_length, side_length});
+  square->GetPointCloud()->SetPoint(3, {0.0, side_length});
+
+  return square;
 }
 
 }

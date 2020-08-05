@@ -14,6 +14,7 @@ public:
   void AddForce(int i, glm::dvec2 F);
   void SpawnNewPoints(std::vector<glm::dvec2> v);
   void RemoveAllPoints();
+  glm::dvec2 GetMomentum() const;
 
   //setters & getters
   int GetNumPoints() const;

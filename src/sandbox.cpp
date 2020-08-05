@@ -20,8 +20,12 @@ namespace sandbox
 Sandbox::Sandbox()
 {
   camera_ = std::make_unique<Camera>();
-  pbd_ = pbd::MakeRod(0.5, 10, 0.02);
-  pbd_->GetPointCloud()->SetForce(0,{0.1,0.1});
+  const double rod_len = 0.5;
+  const int num_edges = 10;
+  const double stiffness = 0.02;
+  //pbd_ = pbd::MakeRod(rod_len, num_edges, stiffness);
+  pbd_ = pbd::MakeSquare(0.1, 0.01);
+  pbd_->GetPointCloud()->SetForce(3,{0.1,0.0});
 }
 
 Sandbox::~Sandbox() {}

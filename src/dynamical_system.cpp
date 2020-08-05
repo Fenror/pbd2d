@@ -20,7 +20,7 @@ void DynamicalSystem::Integrate(double dt)
 {
   for (int i = 0; i < num_points_; ++i)
   {
-    velocities_[i] += masses_[i]*forces_[i]*dt;
+    velocities_[i] += forces_[i]*dt/masses_[i];
     points_[i] += velocities_[i]*dt;
   }
 }

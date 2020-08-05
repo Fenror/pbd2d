@@ -28,7 +28,7 @@ public:
   void SetBendResistance(double r); //Between 0 and 1
 
 private:
-  double GetEdgeLength() const { return rod_length_/num_edges_; }
+  double GetRestingEdgeLength() const { return rod_length_/num_edges_; }
   double GetEdgeLength(int i) const { return glm::length(GetEdge(i)); }
   glm::dvec2 GetEdge(int i) const;
   void EnforceConstraints(double dt);

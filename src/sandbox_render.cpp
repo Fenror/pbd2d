@@ -6,6 +6,7 @@
 #include "camera.hpp"
 #include "dynamical_system.hpp"
 #include "rod.hpp"
+#include "pbd_system.hpp"
 
 namespace sandbox
 {
@@ -131,8 +132,7 @@ void Render(const Sandbox& s, SDL_Window* window)
   SDL_RenderClear(renderer);
   SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
   RenderAxes(s, window);
-  //RenderDynamicalSystem(s, s.GetDynamicalSystem(), window);
-  RenderDynamicalSystem(s, s.GetRod()->GetDynamicalSystem(), window);
+  RenderDynamicalSystem(s, s.GetPbd()->GetDynamicalSystem(), window);
   SDL_RenderPresent(renderer);
 }
 

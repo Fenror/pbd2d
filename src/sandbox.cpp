@@ -12,6 +12,8 @@
 #include "osksdl.hpp"
 #include "dynamical_system.hpp"
 #include "rod.hpp"
+#include "pbd_system.hpp"
+#include "pbd_factory.hpp"
 
 namespace sandbox
 {
@@ -19,9 +21,8 @@ namespace sandbox
 Sandbox::Sandbox()
 {
   camera_ = std::make_unique<Camera>();
-  ds_ = std::make_unique<DynamicalSystem>(4);
-  rod_ = std::make_unique<Rod>(1,10);
-  rod_->GetDynamicalSystem()->SetForce(0,{0.01,0.01});
+  pbd_ = pbd::MakeRod(0.5, 10);
+  pbd_->GetDynamicalSystem()->SetForce(0,{0.1,0.1});
 }
 
 Sandbox::~Sandbox() {}
@@ -45,7 +46,7 @@ void Sandbox::UpdateDynamics(double dt)
 
   while (cur_phys_time < time_accumulator_)
   {
-    rod_->Integrate(physics_dt_);
+    pbd_->Integrate(physics_dt_);
     cur_phys_time += physics_dt_;
   }
 }

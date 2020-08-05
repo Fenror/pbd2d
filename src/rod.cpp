@@ -12,7 +12,7 @@ Rod::Rod(double rod_length, int num_edges)
   ds_ = std::make_unique<DynamicalSystem>(num_edges+1);
   for (int i = 0; i < num_edges+1; ++i)
   {
-    ds_->SetPoint(i,{i*GetEdgeLength(), 0.0});
+    ds_->SetPoint(i,{i*GetRestingEdgeLength(), 0.0});
     ds_->SetMass(i, 1.0/ds_->GetNumPoints());
   }
   length_iterations_ = 20;
@@ -74,11 +74,15 @@ void Rod::EnforceLengthConstraints()
 {
   for (int i = 0; i < num_edges_; ++i)
   {
-    auto edge = GetEdge(i);
+    const auto edge = GetEdge(i);
+    const auto edge_len = glm::length(edge);
+    const auto edge_dir = glm::normalize(edge);
     const double wl = 1/ds_->GetMass(i);
     const double wr = 1/ds_->GetMass(i+1);
-    ds_->DisplacePoint(i, wl/(wl+wr)*0.5*(glm::length(edge) - GetEdgeLength())*glm::normalize(edge));
-    ds_->DisplacePoint(i+1, -wr/(wl+wr)*0.5*(glm::length(edge) - GetEdgeLength())*glm::normalize(edge));
+    const auto dl = wl/(wl+wr)*0.5*(edge_len - GetRestingEdgeLength())*edge_dir;
+    const auto dr = wr/(wl+wr)*0.5*(GetRestingEdgeLength() - edge_len)*edge_dir;
+    ds_->DisplacePoint(i, dl);
+    ds_->DisplacePoint(i+1, dr);
   }
 }
 
@@ -169,7 +173,7 @@ void Rod::SetLength(double l)
 
 double Rod::GetStretch(unsigned int i) const
 {
-  return GetEdgeLength(i)/GetEdgeLength();
+  return GetEdgeLength(i)/GetRestingEdgeLength();
 }
 
 void Rod::SetStretchResistance(int r)

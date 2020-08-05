@@ -88,16 +88,16 @@ void EventHandler(Sandbox* s, SDL_Event e)
       case SDLK_q:
         s->Quit();
         break;
-      case SDLK_LEFT:
+      case SDLK_a:
         s->Pan(Direction::Left, true);
         break;
-      case SDLK_RIGHT:
+      case SDLK_d:
         s->Pan(Direction::Right, true);
         break;
-      case SDLK_UP:
+      case SDLK_w:
         s->Pan(Direction::Up, true);
         break;
-      case SDLK_DOWN:
+      case SDLK_s:
         s->Pan(Direction::Down, true);
         break;
     }
@@ -110,16 +110,16 @@ void EventHandler(Sandbox* s, SDL_Event e)
       case SDLK_q:
         s->Quit();
         break;
-      case SDLK_LEFT:
+      case SDLK_a:
         s->Pan(Direction::Left, false);
         break;
-      case SDLK_RIGHT:
+      case SDLK_d:
         s->Pan(Direction::Right, false);
         break;
-      case SDLK_UP:
+      case SDLK_w:
         s->Pan(Direction::Up, false);
         break;
-      case SDLK_DOWN:
+      case SDLK_s:
         s->Pan(Direction::Down, false);
         break;
     }

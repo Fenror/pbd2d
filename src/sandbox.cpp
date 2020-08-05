@@ -11,7 +11,6 @@
 #include "circle.hpp"
 #include "osksdl.hpp"
 #include "point_cloud.hpp"
-#include "rod.hpp"
 #include "pbd_system.hpp"
 #include "pbd_factory.hpp"
 

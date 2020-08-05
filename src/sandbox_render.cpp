@@ -5,7 +5,6 @@
 #include "sandbox.hpp"
 #include "camera.hpp"
 #include "point_cloud.hpp"
-#include "rod.hpp"
 #include "pbd_system.hpp"
 
 namespace sandbox

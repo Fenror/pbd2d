@@ -9,7 +9,9 @@ add_executable(main src/camera.cpp
                     src/main.cpp
                     src/osksdl.cpp
                     src/sandbox.cpp
-                    src/sandbox_render.cpp)
+                    src/sandbox_render.cpp
+                    src/dynamical_system.cpp
+                    src/rod.cpp)
 target_include_directories(main PUBLIC include)
 target_link_libraries(main PUBLIC -lSDL2 -lSDL2_image -lSDL2_gfx -lSDL2_ttf fontcache)
 target_compile_features(main PUBLIC cxx_std_17)

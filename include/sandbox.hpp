@@ -11,7 +11,8 @@
 
 
 class Camera;
-class Circle;
+class DynamicalSystem;
+class Rod;
 
 namespace sandbox {
 
@@ -32,13 +33,18 @@ public:
   glm::dvec2 GetPanDirection();
 
   //Geometry control
-  Circle* GetCircle() const { return circle_.get(); }
+  DynamicalSystem* GetDynamicalSystem() const { return ds_.get(); }
+  Rod* GetRod() const { return rod_.get(); }
+  double GetPointRadius() const { return point_radius_; }
 
 private:
   std::unique_ptr<Camera> camera_;
-  std::unique_ptr<Circle> circle_;
+  std::unique_ptr<DynamicalSystem> ds_;
+  std::unique_ptr<Rod> rod_;
 
   double time_accumulator_ = 0.0;
+  double point_radius_ = 0.005;
+  double physics_dt_ = 0.1;
   bool running_ = true;
 
   //Camera

@@ -10,6 +10,8 @@
 #include "camera.hpp"
 #include "circle.hpp"
 #include "osksdl.hpp"
+#include "dynamical_system.hpp"
+#include "rod.hpp"
 
 namespace sandbox
 {
@@ -17,7 +19,9 @@ namespace sandbox
 Sandbox::Sandbox()
 {
   camera_ = std::make_unique<Camera>();
-  circle_ = std::make_unique<Circle>(glm::dvec2{0.0,0.0}, 1.0);
+  ds_ = std::make_unique<DynamicalSystem>(4);
+  rod_ = std::make_unique<Rod>(1,10);
+  rod_->GetDynamicalSystem()->SetForce(0,{0.01,0.01});
 }
 
 Sandbox::~Sandbox() {}
@@ -34,9 +38,16 @@ bool Sandbox::IsRunning() const
 
 void Sandbox::UpdateDynamics(double dt)
 {
+  auto cur_phys_time = time_accumulator_;
   time_accumulator_ += dt;
 
   camera_->Displace(GetPanDirection()*dt);
+
+  while (cur_phys_time < time_accumulator_)
+  {
+    rod_->Integrate(physics_dt_);
+    cur_phys_time += physics_dt_;
+  }
 }
 
 void Sandbox::Pan(Direction d, bool onoff)

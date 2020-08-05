@@ -3,8 +3,9 @@
 #include <SDL2/SDL2_gfxPrimitives.h>
 
 #include "sandbox.hpp"
-#include "circle.hpp"
 #include "camera.hpp"
+#include "dynamical_system.hpp"
+#include "rod.hpp"
 
 namespace sandbox
 {
@@ -34,10 +35,11 @@ namespace {
   }
 
   glm::ivec2 WorldToPixel(
+      const Sandbox& s,
       glm::dvec2 coords,
-      SDL_Window* window,
-      const Camera* camera)
+      SDL_Window* window)
   {
+    auto camera = s.GetCamera();
     glm::dvec2 ndc = WorldToNDC(coords, camera);
     glm::ivec2 pixel = NDCToPixel(ndc, window);
     return pixel;
@@ -77,31 +79,23 @@ namespace {
   }
 
   short WorldLengthToPixelLength(
-      double l,
-      SDL_Window* window,
-      const Camera* camera)
+      const Sandbox& s,
+      double world_length,
+      SDL_Window* window)
   {
     int width, height;
     SDL_GetWindowSize(window, &width, &height);
-    const short pixel_length = static_cast<short>(l / camera->GetWidth() * width);
+    auto camera = s.GetCamera();
+    const short pixel_length =
+        static_cast<short>(world_length / camera->GetWidth() * width);
     return pixel_length;
   }
 }
 
 
-void Render(const Sandbox& s, SDL_Window* window)
-{
-  auto renderer = SDL_GetRenderer(window);
-  SDL_RenderClear(renderer);
-  SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-  RenderAxes(s, window);
-  SDL_RenderPresent(renderer);
-}
-
 void RenderAxes(const Sandbox& s, SDL_Window* window)
 {
-  auto camera = s.GetCamera();
-  auto origin = WorldToPixel({0.0,0.0}, window, camera);
+  auto origin = WorldToPixel(s, {0.0,0.0}, window);
   auto renderer = SDL_GetRenderer(window);
   int w,h;
   SDL_GetWindowSize(window, &w, &h);
@@ -112,24 +106,34 @@ void RenderAxes(const Sandbox& s, SDL_Window* window)
   SDL_SetRenderDrawColor(renderer,r,g,b,a);
 }
 
-void Render(
-    const Circle* R,
-    SDL_Window* window,
-    const Camera* camera)
+void RenderDynamicalSystem(
+    const Sandbox& s,
+    const DynamicalSystem* d,
+    SDL_Window* window)
 {
-  auto pixel_center = WorldToPixel(R->GetCenter(), window, camera);
-  const short pixel_radius =
-      WorldLengthToPixelLength(R->GetRadius(), window, camera);
+  auto points = d->GetPoints();
 
   auto renderer = SDL_GetRenderer(window);
   Uint8 r,g,b,a;
   SDL_GetRenderDrawColor(renderer,&r,&g,&b,&a);
-  filledCircleRGBA(renderer,
-      static_cast<short>(pixel_center.x),
-      static_cast<short>(pixel_center.y),
-      pixel_radius, 0x00, 0xFF, 0x00, 0xFF);
+  for (const auto& p : points)
+  {
+    auto center = WorldToPixel(s, p, window);
+    auto radius = WorldLengthToPixelLength(s, s.GetPointRadius(), window);
+    filledCircleRGBA(renderer, center.x, center.y, radius, 255, 0, 0, 255);
+  }
   SDL_SetRenderDrawColor(renderer,r,g,b,a);
 }
 
+void Render(const Sandbox& s, SDL_Window* window)
+{
+  auto renderer = SDL_GetRenderer(window);
+  SDL_RenderClear(renderer);
+  SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+  RenderAxes(s, window);
+  //RenderDynamicalSystem(s, s.GetDynamicalSystem(), window);
+  RenderDynamicalSystem(s, s.GetRod()->GetDynamicalSystem(), window);
+  SDL_RenderPresent(renderer);
+}
 
 }

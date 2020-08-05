@@ -1,13 +1,13 @@
 #include "pbd_system.hpp"
 #include "constraints.hpp"
-#include "dynamical_system.hpp"
+#include "point_cloud.hpp"
 
 namespace pbd
 {
 
 PbdSystem::PbdSystem(int num_vertices)
 {
-  ds_ = std::make_unique<DynamicalSystem>(num_vertices);
+  ds_ = std::make_unique<PointCloud>(num_vertices);
 }
 
 void PbdSystem::AddLengthConstraint(

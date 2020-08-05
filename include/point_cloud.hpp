@@ -1,13 +1,13 @@
-#ifndef DYNAMICAL_SYSTEM_H_
-#define DYNAMICAL_SYSTEM_H_
+#ifndef POINTCLOUD_H_
+#define POINTCLOUD_H_
 
 #include <vector>
 #include <glm/glm.hpp>
 
-class DynamicalSystem
+class PointCloud
 {
 public:
-  DynamicalSystem(int num_points);
+  PointCloud(int num_points);
   void Integrate(double dt);
   void DisplacePoint(int i, glm::dvec2 d);
   void AddVelocity(int i, glm::dvec2 v);

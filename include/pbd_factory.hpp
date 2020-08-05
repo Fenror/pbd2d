@@ -2,7 +2,7 @@
 #define PBD_FACTORY_H_
 
 #include "pbd_system.hpp"
-#include "dynamical_system.hpp"
+#include "point_cloud.hpp"
 #include <memory>
 
 namespace pbd

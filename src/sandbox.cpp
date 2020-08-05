@@ -10,7 +10,7 @@
 #include "camera.hpp"
 #include "circle.hpp"
 #include "osksdl.hpp"
-#include "dynamical_system.hpp"
+#include "point_cloud.hpp"
 #include "rod.hpp"
 #include "pbd_system.hpp"
 #include "pbd_factory.hpp"
@@ -22,7 +22,7 @@ Sandbox::Sandbox()
 {
   camera_ = std::make_unique<Camera>();
   pbd_ = pbd::MakeRod(0.5, 10);
-  pbd_->GetDynamicalSystem()->SetForce(0,{0.1,0.1});
+  pbd_->GetPointCloud()->SetForce(0,{0.1,0.1});
 }
 
 Sandbox::~Sandbox() {}

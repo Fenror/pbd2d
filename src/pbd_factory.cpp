@@ -19,7 +19,7 @@ std::unique_ptr<PbdSystem> MakeRod(double length, int num_edges)
 
   for (int i = 0; i < num_edges+1; ++i)
   {
-    rod->GetDynamicalSystem()
+    rod->GetPointCloud()
        ->SetPoint(i, {i*edge_len, 0.0});
   }
 

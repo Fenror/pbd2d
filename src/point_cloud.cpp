@@ -1,6 +1,6 @@
-#include "dynamical_system.hpp"
+#include "point_cloud.hpp"
 
-DynamicalSystem::DynamicalSystem(int num_points)
+PointCloud::PointCloud(int num_points)
   : num_points_(num_points)
   , points_(num_points)
   , velocities_(num_points)
@@ -16,7 +16,7 @@ DynamicalSystem::DynamicalSystem(int num_points)
   }
 }
 
-void DynamicalSystem::Integrate(double dt)
+void PointCloud::Integrate(double dt)
 {
   for (int i = 0; i < num_points_; ++i)
   {
@@ -25,22 +25,22 @@ void DynamicalSystem::Integrate(double dt)
   }
 }
 
-void DynamicalSystem::DisplacePoint(int i, glm::dvec2 d)
+void PointCloud::DisplacePoint(int i, glm::dvec2 d)
 {
   points_[i] += d;
 }
 
-void DynamicalSystem::AddVelocity(int i, glm::dvec2 v)
+void PointCloud::AddVelocity(int i, glm::dvec2 v)
 {
   velocities_[i] += v;
 }
 
-void DynamicalSystem::AddForce(int i, glm::dvec2 F)
+void PointCloud::AddForce(int i, glm::dvec2 F)
 {
   forces_[i] += F;
 }
 
-void DynamicalSystem::SpawnNewPoints(std::vector<glm::dvec2> v)
+void PointCloud::SpawnNewPoints(std::vector<glm::dvec2> v)
 {
   points_ = v;
   num_points_ = v.size();
@@ -57,7 +57,7 @@ void DynamicalSystem::SpawnNewPoints(std::vector<glm::dvec2> v)
   }
 }
 
-void DynamicalSystem::RemoveAllPoints()
+void PointCloud::RemoveAllPoints()
 {
   num_points_ = 0;
   points_.resize(0);
@@ -67,52 +67,52 @@ void DynamicalSystem::RemoveAllPoints()
 }
 
 //setters & getters
-int DynamicalSystem::GetNumPoints() const
+int PointCloud::GetNumPoints() const
 {
   return num_points_;
 }
 
-std::vector<glm::dvec2> DynamicalSystem::GetPoints() const
+std::vector<glm::dvec2> PointCloud::GetPoints() const
 {
   return points_;
 }
 
-glm::dvec2 DynamicalSystem::GetPoint(int i) const
+glm::dvec2 PointCloud::GetPoint(int i) const
 {
   return points_[i];
 }
 
-void DynamicalSystem::SetPoint(int i, glm::dvec2 p)
+void PointCloud::SetPoint(int i, glm::dvec2 p)
 {
   points_[i] = p;
 }
 
-glm::dvec2 DynamicalSystem::GetVelocity(int i) const
+glm::dvec2 PointCloud::GetVelocity(int i) const
 {
   return velocities_[i];
 }
 
-void DynamicalSystem::SetVelocity(int i, glm::dvec2 v)
+void PointCloud::SetVelocity(int i, glm::dvec2 v)
 {
   velocities_[i] = v;
 }
 
-void DynamicalSystem::SetMass(int i, double m)
+void PointCloud::SetMass(int i, double m)
 {
   masses_[i] = m;
 }
 
-double DynamicalSystem::GetMass(int i) const
+double PointCloud::GetMass(int i) const
 {
   return masses_[i];
 }
 
-void DynamicalSystem::SetForce(int i, glm::dvec2 F)
+void PointCloud::SetForce(int i, glm::dvec2 F)
 {
   forces_[i] = F;
 }
 
-glm::dvec2 DynamicalSystem::GetCenterOfMass() const
+glm::dvec2 PointCloud::GetCenterOfMass() const
 {
   glm::dvec2 center_of_mass{0.0,0.0};
 

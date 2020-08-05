@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-class DynamicalSystem;
+class PointCloud;
 
 namespace pbd
 {
@@ -17,7 +17,7 @@ public:
   void Integrate(double dt);
   void AddLengthConstraint(
       int idx1, int idx2, double target_len, int power);
-  DynamicalSystem* GetDynamicalSystem() const { return ds_.get(); }
+  PointCloud* GetPointCloud() const { return ds_.get(); }
 
 private:
   struct LengthConstraint
@@ -28,7 +28,7 @@ private:
     int power;
   };
 
-  std::unique_ptr<DynamicalSystem> ds_;
+  std::unique_ptr<PointCloud> ds_;
   std::vector<LengthConstraint> length_constraints_;
 };
 

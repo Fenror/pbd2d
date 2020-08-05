@@ -1,5 +1,5 @@
 #include "rod.hpp"
-#include "dynamical_system.hpp"
+#include "point_cloud.hpp"
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #define GLM_FORCE_RADIANS
@@ -9,7 +9,7 @@ Rod::Rod(double rod_length, int num_edges)
   : rod_length_(rod_length)
   , num_edges_(num_edges)
 {
-  ds_ = std::make_unique<DynamicalSystem>(num_edges+1);
+  ds_ = std::make_unique<PointCloud>(num_edges+1);
   for (int i = 0; i < num_edges+1; ++i)
   {
     ds_->SetPoint(i,{i*GetRestingEdgeLength(), 0.0});
@@ -151,7 +151,7 @@ glm::dvec2 Rod::GetEdge(int i) const
 }
 
 //setters and getters
-DynamicalSystem* Rod::GetDynamicalSystem() const
+PointCloud* Rod::GetPointCloud() const
 {
   return ds_.get();
 }

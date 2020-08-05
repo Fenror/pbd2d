@@ -6,7 +6,7 @@
 #include <list>
 #include <glm/glm.hpp>
 
-class DynamicalSystem;
+class PointCloud;
 
 class Rod
 {
@@ -19,7 +19,7 @@ public:
   void Destroy();
   void DampVelocities(double damping);
 
-  DynamicalSystem* GetDynamicalSystem() const;
+  PointCloud* GetPointCloud() const;
   int GetNumEdges() const;
   double GetLength() const;
   void SetLength(double l);
@@ -36,7 +36,7 @@ private:
   void EnforceBendConstraints();
   glm::dvec2 GetGlobalMomentum() const;
 
-  std::unique_ptr<DynamicalSystem> ds_;
+  std::unique_ptr<PointCloud> ds_;
   double rod_length_;
   int num_edges_;
   int length_iterations_;

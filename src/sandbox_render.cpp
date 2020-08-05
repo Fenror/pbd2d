@@ -4,7 +4,7 @@
 
 #include "sandbox.hpp"
 #include "camera.hpp"
-#include "dynamical_system.hpp"
+#include "point_cloud.hpp"
 #include "rod.hpp"
 #include "pbd_system.hpp"
 
@@ -107,9 +107,9 @@ void RenderAxes(const Sandbox& s, SDL_Window* window)
   SDL_SetRenderDrawColor(renderer,r,g,b,a);
 }
 
-void RenderDynamicalSystem(
+void RenderPointCloud(
     const Sandbox& s,
-    const DynamicalSystem* d,
+    const PointCloud* d,
     SDL_Window* window)
 {
   auto points = d->GetPoints();
@@ -132,7 +132,7 @@ void Render(const Sandbox& s, SDL_Window* window)
   SDL_RenderClear(renderer);
   SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
   RenderAxes(s, window);
-  RenderDynamicalSystem(s, s.GetPbd()->GetDynamicalSystem(), window);
+  RenderPointCloud(s, s.GetPbd()->GetPointCloud(), window);
   SDL_RenderPresent(renderer);
 }
 

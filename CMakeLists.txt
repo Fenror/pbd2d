@@ -11,7 +11,6 @@ add_executable(main src/camera.cpp
                     src/sandbox.cpp
                     src/sandbox_render.cpp
                     src/point_cloud.cpp
-                    src/rod.cpp
                     src/constraints.cpp
                     src/pbd_system.cpp
                     src/pbd_factory.cpp)

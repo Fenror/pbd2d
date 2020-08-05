@@ -8,7 +8,8 @@
 namespace pbd
 {
 
-std::unique_ptr<PbdSystem> MakeRod(double length, int num_edges);
+std::unique_ptr<PbdSystem> MakeRod(
+    double length, int num_edges, double stiffness);
 
 }
 

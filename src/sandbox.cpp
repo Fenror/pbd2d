@@ -21,7 +21,7 @@ namespace sandbox
 Sandbox::Sandbox()
 {
   camera_ = std::make_unique<Camera>();
-  pbd_ = pbd::MakeRod(0.5, 10);
+  pbd_ = pbd::MakeRod(0.5, 10, 0.02);
   pbd_->GetPointCloud()->SetForce(0,{0.1,0.1});
 }
 

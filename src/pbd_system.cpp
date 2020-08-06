@@ -10,6 +10,8 @@ PbdSystem::PbdSystem(int num_vertices)
   ds_ = std::make_unique<PointCloud>(num_vertices);
 }
 
+PbdSystem:: ~PbdSystem() {}
+
 void PbdSystem::AddLengthConstraint(
     int idx1,
     int idx2,

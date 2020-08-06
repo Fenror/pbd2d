@@ -1,11 +1,12 @@
 #ifndef PBD_SYSTEM_H_
 #define PBD_SYSTEM_H_
 
+#include "point_cloud.hpp"
+
 #include <glm/glm.hpp>
 #include <memory>
 #include <vector>
 
-class PointCloud;
 
 namespace pbd
 {
@@ -14,6 +15,7 @@ class PbdSystem
 {
 public:
   PbdSystem(int num_vertices);
+  ~PbdSystem();
   void Integrate(double dt);
   void DampVelocity(double damping);
   void AddLengthConstraint(

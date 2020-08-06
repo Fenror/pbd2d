@@ -23,9 +23,9 @@ Sandbox::Sandbox()
   const double rod_len = 0.5;
   const int num_edges = 10;
   const double stiffness = 0.02;
-  //pbd_ = pbd::MakeRod(rod_len, num_edges, stiffness);
-  pbd_ = pbd::MakeSquare(0.1, 0.01);
-  pbd_->GetPointCloud()->SetForce(3,{0.1,0.0});
+  pbds_.push_back(pbd::MakeRod(rod_len, num_edges, stiffness));
+  pbds_.push_back(pbd::MakeSquare(0.1, 0.01));
+  pbds_[0]->GetPointCloud()->SetForce(3,{0.1,0.1});
 }
 
 Sandbox::~Sandbox() {}
@@ -49,7 +49,9 @@ void Sandbox::UpdateDynamics(double dt)
 
   while (cur_phys_time < time_accumulator_)
   {
-    pbd_->Integrate(physics_dt_);
+    for (auto& pbd : pbds_)
+      pbd->Integrate(physics_dt_);
+
     cur_phys_time += physics_dt_;
   }
 }
@@ -91,55 +93,5 @@ glm::dvec2 Sandbox::GetPanDirection()
 
   return dir;
 }
-
-
-//INPUT
-void EventHandler(Sandbox* s, SDL_Event e)
-{
-  if (e.key.type == SDL_KEYDOWN)
-  {
-    switch (e.key.keysym.sym)
-    {
-      case SDLK_q:
-        s->Quit();
-        break;
-      case SDLK_a:
-        s->Pan(Direction::Left, true);
-        break;
-      case SDLK_d:
-        s->Pan(Direction::Right, true);
-        break;
-      case SDLK_w:
-        s->Pan(Direction::Up, true);
-        break;
-      case SDLK_s:
-        s->Pan(Direction::Down, true);
-        break;
-    }
-  }
-
-  if (e.key.type == SDL_KEYUP)
-  {
-    switch (e.key.keysym.sym)
-    {
-      case SDLK_q:
-        s->Quit();
-        break;
-      case SDLK_a:
-        s->Pan(Direction::Left, false);
-        break;
-      case SDLK_d:
-        s->Pan(Direction::Right, false);
-        break;
-      case SDLK_w:
-        s->Pan(Direction::Up, false);
-        break;
-      case SDLK_s:
-        s->Pan(Direction::Down, false);
-        break;
-    }
-  }
-}
-
 
 }

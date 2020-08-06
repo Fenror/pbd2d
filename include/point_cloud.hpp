@@ -8,6 +8,7 @@ class PointCloud
 {
 public:
   PointCloud(int num_points);
+  ~PointCloud();
   void Integrate(double dt);
   void DisplacePoint(int i, glm::dvec2 d);
   void AddVelocity(int i, glm::dvec2 v);

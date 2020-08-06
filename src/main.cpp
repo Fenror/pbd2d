@@ -1,6 +1,7 @@
 #include <iostream>
 #include "sandbox.hpp"
 #include "sandbox_render.hpp"
+#include "sandbox_input.hpp"
 
 #include "osksdl.hpp"
 

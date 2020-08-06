@@ -16,6 +16,8 @@ PointCloud::PointCloud(int num_points)
   }
 }
 
+PointCloud::~PointCloud() {}
+
 void PointCloud::Integrate(double dt)
 {
   for (int i = 0; i < num_points_; ++i)

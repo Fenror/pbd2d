@@ -1,6 +1,8 @@
 #ifndef SANDBOX_H_
 #define SANDBOX_H_
 
+#include "pbd_system.hpp"
+
 #include <memory>
 #include <vector>
 #include <list>
@@ -9,10 +11,10 @@
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 
-namespace pbd
-{
-  class PbdSystem;
-}
+//namespace pbd
+//{
+//  class PbdSystem;
+//}
 
 class Camera;
 
@@ -35,12 +37,12 @@ public:
   glm::dvec2 GetPanDirection();
 
   //Geometry control
-  pbd::PbdSystem* GetPbd() const { return pbd_.get(); }
+  const auto& GetPbds() const { return pbds_; }
   double GetPointRadius() const { return point_radius_; }
 
 private:
   std::unique_ptr<Camera> camera_;
-  std::unique_ptr<pbd::PbdSystem> pbd_;
+  std::vector<std::unique_ptr<pbd::PbdSystem>> pbds_;
 
   double time_accumulator_ = 0.0;
   double point_radius_ = 0.005;
@@ -48,17 +50,11 @@ private:
   bool running_ = true;
 
   //Camera
-  bool dragging_camera_ = false;
   bool pan_left_ = false;
   bool pan_right_ = false;
   bool pan_up_ = false;
   bool pan_down_ = false;
-  glm::dvec2 panning_direction_{0.0, 0.0};
 };
-
-
-//INPUT
-void EventHandler(Sandbox* s, SDL_Event e);
 
 }
 

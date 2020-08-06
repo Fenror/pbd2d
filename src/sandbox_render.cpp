@@ -131,7 +131,10 @@ void Render(const Sandbox& s, SDL_Window* window)
   SDL_RenderClear(renderer);
   SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
   RenderAxes(s, window);
-  RenderPointCloud(s, s.GetPbd()->GetPointCloud(), window);
+  for (const auto& pbd : s.GetPbds())
+  {
+    RenderPointCloud(s, pbd->GetPointCloud(), window);
+  }
   SDL_RenderPresent(renderer);
 }
 

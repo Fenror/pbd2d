@@ -3,10 +3,11 @@
 
 #include "pbd_system.hpp"
 
-#include <memory>
-#include <vector>
 #include <list>
+#include <map>
+#include <memory>
 #include <stdint.h>
+#include <vector>
 
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
@@ -21,6 +22,7 @@ class Camera;
 namespace sandbox {
 
 enum class Direction{Up, Down, Left, Right};
+enum class Selection{Hover, Selected};
 
 class Sandbox
 {
@@ -33,17 +35,24 @@ public:
 
   //Camera control
   Camera* GetCamera() const { return camera_.get(); }
-  void Pan(Direction d, bool on_or_off);
+  void Pan(Direction d, bool on);
   glm::dvec2 GetPanDirection();
 
   //Geometry control
   const auto& GetPbds() const { return pbds_; }
+  glm::dvec2 GetPoint(int pdb_idx, int point_idx) const;
   double GetPointRadius() const { return point_radius_; }
+  const auto& GetSelections() const { return selections_; }
+  void SelectPoint(int pbd_idx, int point_idx, Selection type);
+  void SetAttractorPoint(glm::dvec2 p);
+  void DeselectAll();
 
 private:
   std::unique_ptr<Camera> camera_;
   std::vector<std::unique_ptr<pbd::PbdSystem>> pbds_;
+  std::map<std::pair<int,int>, Selection> selections_;
 
+  glm::dvec2 attractor_point_;
   double time_accumulator_ = 0.0;
   double point_radius_ = 0.005;
   double physics_dt_ = 0.01;

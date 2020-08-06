@@ -44,10 +44,13 @@ std::unique_ptr<PbdSystem> MakeSquare(
   const double angle = glm::half_pi<double>();
   const int power = 1;
 
+  const double c = glm::length(glm::dvec2{side_length, side_length});
   square->AddLengthConstraint(0,1,side_length,power);
   square->AddLengthConstraint(1,2,side_length,power);
   square->AddLengthConstraint(2,3,side_length,power);
   square->AddLengthConstraint(3,0,side_length,power);
+  square->AddLengthConstraint(0,2,c,power);
+  square->AddLengthConstraint(1,3,c,power);
 
   square->AddAngleConstraint(0,1,2,angle,stiffness,power);
   square->AddAngleConstraint(1,2,3,angle,stiffness,power);

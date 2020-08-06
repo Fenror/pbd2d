@@ -10,86 +10,85 @@
 namespace sandbox
 {
 
-namespace {
-  glm::dvec2 WorldToNDC(
-      glm::dvec2 coords,
-      const Camera* camera)
-  {
-    double left, right, top, bottom;
-    camera->GetLimits(&left, &right, &top, &bottom);
-    glm::dvec2 local = coords - camera->GetCenter();
-    glm::dvec2 ndc{local.x/(right-left) + 0.5,
-                   local.y/(top-bottom) + 0.5};
+glm::dvec2 WorldToNDC(
+    const Sandbox& s,
+    glm::dvec2 coords)
+{
+  const auto camera = s.GetCamera();
+  double left, right, top, bottom;
+  camera->GetLimits(&left, &right, &top, &bottom);
+  glm::dvec2 local = coords - camera->GetCenter();
+  glm::dvec2 ndc{local.x/(right-left) + 0.5,
+                 local.y/(top-bottom) + 0.5};
 
-    return ndc;
-  }
+  return ndc;
+}
 
-  glm::ivec2 NDCToPixel(glm::dvec2 coords, SDL_Window* window)
-  {
-    int width, height;
-    SDL_GetWindowSize(window, &width, &height);
-    int x = static_cast<int>(coords.x*width);
-    int y = static_cast<int>((1.0-coords.y)*height);
+glm::ivec2 NDCToPixel(glm::dvec2 coords, SDL_Window* window)
+{
+  int width, height;
+  SDL_GetWindowSize(window, &width, &height);
+  int x = static_cast<int>(coords.x*width);
+  int y = static_cast<int>((1.0-coords.y)*height);
 
-    return glm::ivec2{x,y};
-  }
+  return glm::ivec2{x,y};
+}
 
-  glm::ivec2 WorldToPixel(
-      const Sandbox& s,
-      glm::dvec2 coords,
-      SDL_Window* window)
-  {
-    auto camera = s.GetCamera();
-    glm::dvec2 ndc = WorldToNDC(coords, camera);
-    glm::ivec2 pixel = NDCToPixel(ndc, window);
-    return pixel;
-  }
+glm::ivec2 WorldToPixel(
+    const Sandbox& s,
+    glm::dvec2 coords,
+    SDL_Window* window)
+{
+  glm::dvec2 ndc = WorldToNDC(s, coords);
+  glm::ivec2 pixel = NDCToPixel(ndc, window);
+  return pixel;
+}
 
-  glm::dvec2 PixelToNDC(glm::ivec2 coords, SDL_Window* window)
-  {
-    int width, height;
-    SDL_GetWindowSize(window, &width, &height);
-    glm::dvec2 ndc;
-    ndc.x = static_cast<double>(coords.x)/width;
-    ndc.y = 1.0 - static_cast<double>(coords.y)/height;
+glm::dvec2 PixelToNDC(glm::ivec2 coords, SDL_Window* window)
+{
+  int width, height;
+  SDL_GetWindowSize(window, &width, &height);
+  glm::dvec2 ndc;
+  ndc.x = static_cast<double>(coords.x)/width;
+  ndc.y = 1.0 - static_cast<double>(coords.y)/height;
 
-    return ndc;
-  }
+  return ndc;
+}
 
-  glm::dvec2 NDCToWorld(glm::dvec2 coords, const Camera* camera)
-  {
-    double left, right, top, bottom;
-    camera->GetLimits(&left, &right, &top, &bottom);
-    glm::dvec2 world;
-    world.x = left + coords.x*(right-left);
-    world.y = bottom + coords.y*(top-bottom);
+glm::dvec2 NDCToWorld(const Sandbox& s, glm::dvec2 coords)
+{
+  const auto camera = s.GetCamera();
+  double left, right, top, bottom;
+  camera->GetLimits(&left, &right, &top, &bottom);
+  glm::dvec2 world;
+  world.x = left + coords.x*(right-left);
+  world.y = bottom + coords.y*(top-bottom);
 
-    return world;
-  }
+  return world;
+}
 
-  glm::dvec2 PixelToWorld(
-      glm::ivec2 coords,
-      SDL_Window* window,
-      const Camera* camera)
-  {
-    glm::dvec2 ndc = PixelToNDC(coords, window);
-    glm::dvec2 world = NDCToWorld(ndc, camera);
+glm::dvec2 PixelToWorld(
+    const Sandbox& s,
+    SDL_Window* window,
+    glm::ivec2 coords)
+{
+  glm::dvec2 ndc = PixelToNDC(coords, window);
+  glm::dvec2 world = NDCToWorld(s, ndc);
 
-    return world;
-  }
+  return world;
+}
 
-  short WorldLengthToPixelLength(
-      const Sandbox& s,
-      double world_length,
-      SDL_Window* window)
-  {
-    int width, height;
-    SDL_GetWindowSize(window, &width, &height);
-    auto camera = s.GetCamera();
-    const short pixel_length =
-        static_cast<short>(world_length / camera->GetWidth() * width);
-    return pixel_length;
-  }
+short WorldLengthToPixelLength(
+    const Sandbox& s,
+    double world_length,
+    SDL_Window* window)
+{
+  int width, height;
+  SDL_GetWindowSize(window, &width, &height);
+  auto camera = s.GetCamera();
+  const short pixel_length =
+      static_cast<short>(world_length / camera->GetWidth() * width);
+  return pixel_length;
 }
 
 
@@ -125,6 +124,25 @@ void RenderPointCloud(
   SDL_SetRenderDrawColor(renderer,r,g,b,a);
 }
 
+void RenderSelections(
+    const Sandbox& s,
+    SDL_Window* window)
+{
+  auto renderer = SDL_GetRenderer(window);
+  Uint8 r,g,b,a;
+  SDL_GetRenderDrawColor(renderer,&r,&g,&b,&a);
+  for (const auto& sel : s.GetSelections())
+  {
+    const auto pbd_idx = sel.first.first;
+    const auto point_idx = sel.first.second;
+    const auto point = s.GetPoint(pbd_idx, point_idx);
+    const auto pixel = WorldToPixel(s, point, window);
+    auto radius = WorldLengthToPixelLength(s, s.GetPointRadius(), window);
+    filledCircleRGBA(renderer, pixel.x, pixel.y, radius, 0, 0, 255, 255);
+  }
+  SDL_SetRenderDrawColor(renderer,r,g,b,a);
+}
+
 void Render(const Sandbox& s, SDL_Window* window)
 {
   auto renderer = SDL_GetRenderer(window);
@@ -135,6 +153,7 @@ void Render(const Sandbox& s, SDL_Window* window)
   {
     RenderPointCloud(s, pbd->GetPointCloud(), window);
   }
+  RenderSelections(s, window);
   SDL_RenderPresent(renderer);
 }
 

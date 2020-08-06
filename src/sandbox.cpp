@@ -25,7 +25,6 @@ Sandbox::Sandbox()
   const double stiffness = 0.02;
   pbds_.push_back(pbd::MakeRod(rod_len, num_edges, stiffness));
   pbds_.push_back(pbd::MakeSquare(0.1, 0.01));
-  pbds_[0]->GetPointCloud()->SetForce(3,{0.1,0.1});
 }
 
 Sandbox::~Sandbox() {}
@@ -54,6 +53,42 @@ void Sandbox::UpdateDynamics(double dt)
 
     cur_phys_time += physics_dt_;
   }
+
+  for (const auto& sel : selections_)
+  {
+    const int pbd_idx = sel.first.first;
+    const int point_idx = sel.first.second;
+    pbds_[pbd_idx]->GetPointCloud()
+                  ->SetPoint(point_idx, attractor_point_);
+  }
+}
+
+glm::dvec2 Sandbox::GetPoint(int pbd_idx, int point_idx) const
+{
+  return pbds_[pbd_idx]->GetPointCloud()->GetPoint(point_idx);
+}
+
+void Sandbox::SelectPoint(int pbd_idx, int point_idx, Selection type)
+{
+  std::pair<int,int> key{pbd_idx, point_idx};
+  if (selections_.count(key))
+  {
+    selections_.erase(key);
+  }
+  else
+  {
+    selections_.emplace(std::pair<int,int>{pbd_idx, point_idx}, type);
+  }
+}
+
+void Sandbox::DeselectAll()
+{
+  selections_.clear();
+}
+
+void Sandbox::SetAttractorPoint(glm::dvec2 p)
+{
+  attractor_point_ = p;
 }
 
 void Sandbox::Pan(Direction d, bool onoff)

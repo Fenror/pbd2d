@@ -26,6 +26,8 @@ Sandbox::Sandbox()
   const double stiffness = 0.02;
   pbds_.push_back(pbd::MakeRod(rod_len, 0.1, num_edges, stiffness));
   pbds_.push_back(pbd::MakeSquare(0.1, 0.01));
+  pbds_[0]->SetGravity({0,-9.82});
+  pbds_[1]->SetGravity({0,-9.82});
 }
 
 Sandbox::~Sandbox() {}
@@ -52,6 +54,8 @@ void Sandbox::UpdateDynamics(double dt)
     for (auto& pbd : pbds_)
       pbd->Integrate(physics_dt_);
 
+    HandleFloorCollisions(physics_dt_);
+
     for (const auto& sel : selections_)
     {
       const int pbd_idx = sel.first.first;
@@ -67,13 +71,20 @@ void Sandbox::UpdateDynamics(double dt)
 
 }
 
-void Sandbox::HandleFloorCollisions()
+void Sandbox::HandleFloorCollisions(double dt)
 {
   for (auto& pbd : pbds_)
   {
     for (int i = 0; i < pbd->GetNumPoints(); ++i)
     {
-      
+      const auto p = pbd->GetPoint(i);
+      if (p.y < floor_level_)
+      {
+        pbd->DisplacePointAndUpdateVelocity(
+            i, {0.0, floor_level_-p.y}, dt);
+        const auto v = pbd->GetVelocity(i);
+        pbd->SetVelocity(i, {0.0, v.y});
+      }
     }
   }
 }

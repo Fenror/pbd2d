@@ -44,11 +44,13 @@ public:
   void DeselectAll();
 
 private:
+  void HandleFloorCollisions();
   std::unique_ptr<Camera> camera_;
   std::vector<std::unique_ptr<pbd::PbdSystem>> pbds_;
   std::map<std::pair<int,int>, Selection> selections_;
 
   glm::dvec2 attractor_point_;
+  double floor_level_ = -0.5;
   double time_accumulator_ = 0.0;
   double point_radius_ = 0.005;
   double physics_dt_ = 0.01;

@@ -11,8 +11,10 @@ public:
   ~PointCloud();
   void Integrate(double dt);
   void DisplacePoint(int i, glm::dvec2 d);
+  void DisplacePointAndUpdateVelocity(int i, glm::dvec2 d, double dt);
   void AddVelocity(int i, glm::dvec2 v);
   void AddForce(int i, glm::dvec2 F);
+  void SetGravity(glm::dvec2 g);
   void SpawnNewPoints(std::vector<glm::dvec2> v);
   void RemoveAllPoints();
   glm::dvec2 GetMomentum() const;
@@ -35,6 +37,7 @@ private:
   std::vector<glm::dvec2> velocities_;
   std::vector<glm::dvec2> forces_;
   std::vector<double> masses_;
+  glm::dvec2 gravity_{0.0,0.0};
 };
 
 #endif

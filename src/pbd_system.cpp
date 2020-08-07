@@ -62,10 +62,8 @@ void PbdSystem::HandleLengthConstraints(double dt)
       const auto target_len = c.target_len;
       glm::dvec2 dp, dq;
       GetLengthConstraintDelta(p,pm,q,qm,target_len,&dp,&dq);
-      ds_->DisplacePoint(c.idx1, dp);
-      ds_->AddVelocity(c.idx1, dp/dt);
-      ds_->DisplacePoint(c.idx2, dq);
-      ds_->AddVelocity(c.idx2, dq/dt);
+      ds_->DisplacePointAndUpdateVelocity(c.idx1, dp, dt);
+      ds_->DisplacePointAndUpdateVelocity(c.idx2, dq, dt);
     }
   }
 }
@@ -89,14 +87,16 @@ void PbdSystem::HandleAngleConstraints(double dt)
           p,pm,q,qm,r,rm,
           target_angle,stiffness,
           &dp,&dq,&dr);
-      ds_->DisplacePoint(c.idx1, dp);
-      ds_->AddVelocity(c.idx1, dp/dt);
-      ds_->DisplacePoint(c.idx2, dq);
-      ds_->AddVelocity(c.idx2, dq/dt);
-      ds_->DisplacePoint(c.idx3, dr);
-      ds_->AddVelocity(c.idx3, dr/dt);
+      ds_->DisplacePointAndUpdateVelocity(c.idx1, dp, dt);
+      ds_->DisplacePointAndUpdateVelocity(c.idx2, dq, dt);
+      ds_->DisplacePointAndUpdateVelocity(c.idx3, dr, dt);
     }
   }
+}
+
+glm::dvec2 PbdSystem::GetPoint(int i) const
+{
+  return ds_->GetPoint(i);
 }
 
 }

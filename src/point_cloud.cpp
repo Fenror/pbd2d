@@ -22,7 +22,7 @@ void PointCloud::Integrate(double dt)
 {
   for (int i = 0; i < num_points_; ++i)
   {
-    velocities_[i] += forces_[i]*dt/masses_[i];
+    velocities_[i] += forces_[i]*dt/masses_[i] + gravity_*dt;
     points_[i] += velocities_[i]*dt;
   }
 }
@@ -30,6 +30,13 @@ void PointCloud::Integrate(double dt)
 void PointCloud::DisplacePoint(int i, glm::dvec2 d)
 {
   points_[i] += d;
+}
+
+void PointCloud::DisplacePointAndUpdateVelocity(
+    int i, glm::dvec2 d, double dt)
+{
+  points_[i] += d;
+  velocities_[i] += d/dt;
 }
 
 void PointCloud::AddVelocity(int i, glm::dvec2 v)
@@ -40,6 +47,11 @@ void PointCloud::AddVelocity(int i, glm::dvec2 v)
 void PointCloud::AddForce(int i, glm::dvec2 F)
 {
   forces_[i] += F;
+}
+
+void PointCloud::SetGravity(glm::dvec2 g)
+{
+  gravity_ = g;
 }
 
 void PointCloud::SpawnNewPoints(std::vector<glm::dvec2> v)

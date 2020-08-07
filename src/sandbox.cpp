@@ -24,7 +24,7 @@ Sandbox::Sandbox()
   const double rod_len = 0.5;
   const int num_edges = 100;
   const double stiffness = 0.02;
-  pbds_.push_back(pbd::MakeRod(rod_len, num_edges, stiffness));
+  pbds_.push_back(pbd::MakeRod(rod_len, 0.1, num_edges, stiffness));
   pbds_.push_back(pbd::MakeSquare(0.1, 0.01));
 }
 
@@ -52,15 +52,30 @@ void Sandbox::UpdateDynamics(double dt)
     for (auto& pbd : pbds_)
       pbd->Integrate(physics_dt_);
 
+    for (const auto& sel : selections_)
+    {
+      const int pbd_idx = sel.first.first;
+      const int point_idx = sel.first.second;
+      const auto p = pbds_[pbd_idx]->GetPointCloud()->GetPoint(point_idx);
+      const auto d = attractor_point_ - p;
+      pbds_[pbd_idx]->GetPointCloud()
+                    ->DisplacePointAndUpdateVelocity(
+                        point_idx, d, physics_dt_);
+    }
+
     cur_phys_time += physics_dt_;
   }
 
-  for (const auto& sel : selections_)
+}
+
+void Sandbox::HandleFloorCollisions()
+{
+  for (auto& pbd : pbds_)
   {
-    const int pbd_idx = sel.first.first;
-    const int point_idx = sel.first.second;
-    pbds_[pbd_idx]->GetPointCloud()
-                  ->SetPoint(point_idx, attractor_point_);
+    for (int i = 0; i < pbd->GetPointCloud()->GetNumPoints(); ++i)
+    {
+      
+    }
   }
 }
 
@@ -79,19 +94,12 @@ void Sandbox::SelectPoint(int pbd_idx, int point_idx, Selection type)
   else
   {
     const double inf = std::numeric_limits<double>::max();
-    pbds_[pbd_idx]->GetPointCloud()->SetMass(point_idx, inf);
     selections_.emplace(std::pair<int,int>{pbd_idx, point_idx}, type);
   }
 }
 
 void Sandbox::DeselectAll()
 {
-  for (const auto& sel : selections_)
-  {
-    const int pbd_idx = sel.first.first;
-    const int point_idx = sel.first.second;
-    pbds_[pbd_idx]->GetPointCloud()->SetMass(point_idx, 1.0);
-  }
   selections_.clear();
 }
 

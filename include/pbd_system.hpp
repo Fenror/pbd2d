@@ -23,6 +23,7 @@ public:
   void AddAngleConstraint(
       int idx1, int idx2, int idx3,
       double target_angle, double stiffness, int power);
+  glm::dvec2 GetPoint(int i) const;
   PointCloud* GetPointCloud() const { return ds_.get(); }
 
 private:

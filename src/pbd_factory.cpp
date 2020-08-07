@@ -7,7 +7,7 @@ namespace pbd
 {
 
 std::unique_ptr<PbdSystem> MakeRod(
-    double length, int num_edges, double stiffness)
+    double length, double mass, int num_edges, double stiffness)
 {
   std::unique_ptr<PbdSystem> rod =
       std::make_unique<PbdSystem>(num_edges+1);
@@ -30,6 +30,8 @@ std::unique_ptr<PbdSystem> MakeRod(
   {
     rod->GetPointCloud()
        ->SetPoint(i, {i*edge_len, 0.0});
+    rod->GetPointCloud()
+       ->SetMass(i, mass/(num_edges+1));
   }
 
   return rod;

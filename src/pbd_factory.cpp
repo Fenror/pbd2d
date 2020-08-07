@@ -28,10 +28,8 @@ std::unique_ptr<PbdSystem> MakeRod(
 
   for (int i = 0; i < num_edges+1; ++i)
   {
-    rod->GetPointCloud()
-       ->SetPoint(i, {i*edge_len, 0.0});
-    rod->GetPointCloud()
-       ->SetMass(i, mass/(num_edges+1));
+    rod->SetPoint(i, {i*edge_len, 0.0});
+    rod->SetMass(i, mass/(num_edges+1));
   }
 
   return rod;
@@ -59,10 +57,10 @@ std::unique_ptr<PbdSystem> MakeSquare(
   square->AddAngleConstraint(2,3,0,angle,stiffness,power);
   square->AddAngleConstraint(3,0,1,angle,stiffness,power);
 
-  square->GetPointCloud()->SetPoint(0, {0.0, 0.0});
-  square->GetPointCloud()->SetPoint(1, {side_length, 0.0});
-  square->GetPointCloud()->SetPoint(2, {side_length, side_length});
-  square->GetPointCloud()->SetPoint(3, {0.0, side_length});
+  square->SetPoint(0, {0.0, 0.0});
+  square->SetPoint(1, {side_length, 0.0});
+  square->SetPoint(2, {side_length, side_length});
+  square->SetPoint(3, {0.0, side_length});
 
   return square;
 }

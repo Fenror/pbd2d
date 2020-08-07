@@ -151,7 +151,7 @@ void Render(const Sandbox& s, SDL_Window* window)
   RenderAxes(s, window);
   for (const auto& pbd : s.GetPbds())
   {
-    RenderPointCloud(s, pbd->GetPointCloud(), window);
+    RenderPointCloud(s, pbd.get(), window);
   }
   RenderSelections(s, window);
   SDL_RenderPresent(renderer);

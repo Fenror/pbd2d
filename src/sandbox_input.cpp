@@ -73,10 +73,10 @@ void SelectNearestPoint(
   for (int pbd_idx = 0; pbd_idx < pbds.size(); ++pbd_idx)
   {
     const auto& pbd = pbds[pbd_idx];
-    const int num_pts = pbd->GetPointCloud()->GetNumPoints();
+    const int num_pts = pbd->GetNumPoints();
     for (int point_idx = 0; point_idx < num_pts; ++point_idx)
     {
-      const auto p = pbd->GetPointCloud()->GetPoint(point_idx);
+      const auto p = pbd->GetPoint(point_idx);
       const auto point_pixel = WorldToPixel(*s, p, w);
       if (glm::abs(point_pixel.x-pixel.x) < tol &&
           glm::abs(point_pixel.y-pixel.y) < tol)

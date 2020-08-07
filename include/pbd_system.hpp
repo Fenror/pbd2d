@@ -11,20 +11,17 @@
 namespace pbd
 {
 
-class PbdSystem
+class PbdSystem : public PointCloud
 {
 public:
-  PbdSystem(int num_vertices);
-  ~PbdSystem();
-  void Integrate(double dt);
+  using PointCloud::PointCloud;
+  void Integrate(double dt) override;
   void DampVelocity(double damping);
   void AddLengthConstraint(
       int idx1, int idx2, double target_len, int power);
   void AddAngleConstraint(
       int idx1, int idx2, int idx3,
       double target_angle, double stiffness, int power);
-  glm::dvec2 GetPoint(int i) const;
-  PointCloud* GetPointCloud() const { return ds_.get(); }
 
 private:
   void HandleLengthConstraints(double dt);
@@ -48,7 +45,6 @@ private:
     int power;
   };
 
-  std::unique_ptr<PointCloud> ds_;
   std::vector<LengthConstraint> length_constraints_;
   std::vector<AngleConstraint> angle_constraints_;
 };

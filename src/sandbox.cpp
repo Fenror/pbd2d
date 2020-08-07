@@ -56,11 +56,10 @@ void Sandbox::UpdateDynamics(double dt)
     {
       const int pbd_idx = sel.first.first;
       const int point_idx = sel.first.second;
-      const auto p = pbds_[pbd_idx]->GetPointCloud()->GetPoint(point_idx);
+      const auto p = pbds_[pbd_idx]->GetPoint(point_idx);
       const auto d = attractor_point_ - p;
-      pbds_[pbd_idx]->GetPointCloud()
-                    ->DisplacePointAndUpdateVelocity(
-                        point_idx, d, physics_dt_);
+      pbds_[pbd_idx]->DisplacePointAndUpdateVelocity(
+          point_idx, d, physics_dt_);
     }
 
     cur_phys_time += physics_dt_;
@@ -72,7 +71,7 @@ void Sandbox::HandleFloorCollisions()
 {
   for (auto& pbd : pbds_)
   {
-    for (int i = 0; i < pbd->GetPointCloud()->GetNumPoints(); ++i)
+    for (int i = 0; i < pbd->GetNumPoints(); ++i)
     {
       
     }
@@ -81,7 +80,7 @@ void Sandbox::HandleFloorCollisions()
 
 glm::dvec2 Sandbox::GetPoint(int pbd_idx, int point_idx) const
 {
-  return pbds_[pbd_idx]->GetPointCloud()->GetPoint(point_idx);
+  return pbds_[pbd_idx]->GetPoint(point_idx);
 }
 
 void Sandbox::SelectPoint(int pbd_idx, int point_idx, Selection type)

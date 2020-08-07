@@ -52,8 +52,8 @@ void GetAngleConstraintDelta(
   const auto l2 = -glm::sqrt(std::max(1e-10,1-dotprod*dotprod))*l1;
   const auto r2 = -glm::sqrt(std::max(1e-10,1-dotprod*dotprod))*r1;
   const double pw = 1/pmass;
-  const double qw = 1/qmass;
-  const double rw = 1/rmass;
+  const double qw = 1/pmass;
+  const double rw = 1/pmass;
   const double s =
     pw*glm::length2(l1) + qw*glm::length2(l1-r1) + rw*glm::length2(r1);
 

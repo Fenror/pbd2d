@@ -12,11 +12,6 @@
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 
-//namespace pbd
-//{
-//  class PbdSystem;
-//}
-
 class Camera;
 
 namespace sandbox {
@@ -40,6 +35,7 @@ public:
 
   //Geometry control
   const auto& GetPbds() const { return pbds_; }
+  pbd::PbdSystem* GetPbd(int idx) const { return pbds_[idx].get(); }
   glm::dvec2 GetPoint(int pdb_idx, int point_idx) const;
   double GetPointRadius() const { return point_radius_; }
   const auto& GetSelections() const { return selections_; }

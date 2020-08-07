@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <limits>
 #include <SDL2/SDL.h>
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/norm.hpp>
@@ -21,7 +22,7 @@ Sandbox::Sandbox()
 {
   camera_ = std::make_unique<Camera>();
   const double rod_len = 0.5;
-  const int num_edges = 10;
+  const int num_edges = 100;
   const double stiffness = 0.02;
   pbds_.push_back(pbd::MakeRod(rod_len, num_edges, stiffness));
   pbds_.push_back(pbd::MakeSquare(0.1, 0.01));
@@ -77,12 +78,20 @@ void Sandbox::SelectPoint(int pbd_idx, int point_idx, Selection type)
   }
   else
   {
+    const double inf = std::numeric_limits<double>::max();
+    pbds_[pbd_idx]->GetPointCloud()->SetMass(point_idx, inf);
     selections_.emplace(std::pair<int,int>{pbd_idx, point_idx}, type);
   }
 }
 
 void Sandbox::DeselectAll()
 {
+  for (const auto& sel : selections_)
+  {
+    const int pbd_idx = sel.first.first;
+    const int point_idx = sel.first.second;
+    pbds_[pbd_idx]->GetPointCloud()->SetMass(point_idx, 1.0);
+  }
   selections_.clear();
 }
 

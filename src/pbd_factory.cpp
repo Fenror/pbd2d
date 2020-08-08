@@ -29,7 +29,7 @@ std::unique_ptr<PbdSystem> MakeRod(
 
   for (int i = 0; i < num_edges+1; ++i)
   {
-    rod->SetPoint(i, {i*edge_len, 0.0});
+    rod->SetPoint(i, {i*edge_len, 0.5});
     rod->SetMass(i, mass/(num_edges+1));
   }
 

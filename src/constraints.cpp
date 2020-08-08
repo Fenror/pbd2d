@@ -22,8 +22,8 @@ void GetLengthConstraintDelta(
   const auto dCdu = u/ulen;
   const auto dCdp = -dCdu;
   const auto dCdq = dCdu;
-  const double pw = 1/pmass;
-  const double qw = 1/qmass;
+  const auto pw = 1/pmass;
+  const auto qw = 1/qmass;
   const auto s = C/(pw*glm::length2(dCdp) + qw*glm::length2(dCdq));
   *dp = -s*stiffness*pw*dCdp;
   *dq = -s*stiffness*qw*dCdq;

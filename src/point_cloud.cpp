@@ -14,12 +14,15 @@ PointCloud::PointCloud(int num_points)
     forces_[i] = {0.0, 0.0};
     masses_[i] = 1.0;
   }
+
+  points_from_prev_timestep_ = points_;
 }
 
 PointCloud::~PointCloud() {}
 
 void PointCloud::Integrate(double dt)
 {
+  points_from_prev_timestep_ = points_;
   for (int i = 0; i < num_points_; ++i)
   {
     velocities_[i] += forces_[i]*dt/masses_[i] + gravity_*dt;
@@ -94,6 +97,11 @@ std::vector<glm::dvec2> PointCloud::GetPoints() const
 glm::dvec2 PointCloud::GetPoint(int i) const
 {
   return points_[i];
+}
+
+glm::dvec2 PointCloud::GetPointFromPreviousTimestep(int i) const
+{
+  return points_from_prev_timestep_[i];
 }
 
 void PointCloud::SetPoint(int i, glm::dvec2 p)

@@ -27,7 +27,7 @@ Sandbox::Sandbox()
 
   //Add rod
   const double rod_len = 0.5;
-  const int num_edges = 3;
+  const int num_edges = 4;
   const double stretch_resistance = 1.0;
   const double bend_resistance = 1.0;
   pbds_.push_back(pbd::MakeRod(
@@ -35,7 +35,7 @@ Sandbox::Sandbox()
   pbds_[0]->SetGravity({0,-9.82});
 
   //Add square
-  const double stiffness = 0.3;
+  const double stiffness = 1.0;
   pbds_.push_back(pbd::MakeSquare(0.1, stiffness));
   pbds_[1]->SetGravity({0,-9.82});
 
@@ -46,6 +46,27 @@ Sandbox::Sandbox()
   collisions_.AddHalfPlane(normal, center, friction_coeff);
   collisions_.AddPointCloud(pbds_[0].get());
   collisions_.AddPointCloud(pbds_[1].get());
+
+
+  //Add collidables
+  collisions_.AddPoint(pbds_[1].get(), 0, point_radius_);
+  collisions_.AddPoint(pbds_[1].get(), 1, point_radius_);
+  collisions_.AddPoint(pbds_[1].get(), 2, point_radius_);
+  collisions_.AddPoint(pbds_[1].get(), 3, point_radius_);
+  collisions_.AddLineSeg(pbds_[1].get(), 0, 1, 0.0);
+  collisions_.AddLineSeg(pbds_[1].get(), 1, 2, 0.0);
+  collisions_.AddLineSeg(pbds_[1].get(), 2, 3, 0.0);
+  collisions_.AddLineSeg(pbds_[1].get(), 3, 4, 0.0);
+
+  collisions_.AddPoint(pbds_[0].get(), 0, point_radius_);
+  collisions_.AddPoint(pbds_[0].get(), 1, point_radius_);
+  collisions_.AddPoint(pbds_[0].get(), 2, point_radius_);
+  collisions_.AddPoint(pbds_[0].get(), 3, point_radius_);
+  collisions_.AddPoint(pbds_[0].get(), 4, point_radius_);
+  collisions_.AddLineSeg(pbds_[0].get(), 0, 1, 0.0);
+  collisions_.AddLineSeg(pbds_[0].get(), 1, 2, 0.0);
+  collisions_.AddLineSeg(pbds_[0].get(), 2, 3, 0.0);
+  collisions_.AddLineSeg(pbds_[0].get(), 3, 4, 0.0);
 }
 
 Sandbox::~Sandbox() {}

@@ -54,8 +54,8 @@ private:
   glm::dvec2 attractor_point_;
   double floor_level_ = 0.0;
   double time_accumulator_ = 0.0;
-  double point_radius_ = 0.005;
-  double physics_dt_ = 0.01;
+  double point_radius_ = 0.01;
+  double physics_dt_ = 0.001;
   bool running_ = true;
   pbd::collisions::Collisions collisions_;
 

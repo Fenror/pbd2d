@@ -8,7 +8,8 @@ add_library(pbd2d STATIC src/point_cloud.cpp
                          src/constraints.cpp
                          src/pbd_system.cpp
                          src/pbd_factory.cpp
-                         src/collisions.cpp)
+                         src/collisions.cpp
+                         src/geometry.cpp)
 target_include_directories(pbd2d PUBLIC include)
 
 add_executable(main src/camera.cpp

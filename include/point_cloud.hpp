@@ -23,6 +23,7 @@ public:
   int GetNumPoints() const;
   std::vector<glm::dvec2> GetPoints() const;
   glm::dvec2 GetPoint(int i) const;
+  glm::dvec2 GetPointFromPreviousTimestep(int i) const;
   void SetPoint(int i, glm::dvec2 p);
   glm::dvec2 GetVelocity(int i) const;
   void SetVelocity(int i, glm::dvec2 v);
@@ -34,6 +35,7 @@ public:
 private:
   int num_points_;
   std::vector<glm::dvec2> points_;
+  std::vector<glm::dvec2> points_from_prev_timestep_;
   std::vector<glm::dvec2> velocities_;
   std::vector<glm::dvec2> forces_;
   std::vector<double> masses_;

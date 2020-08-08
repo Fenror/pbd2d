@@ -12,54 +12,79 @@ void GetLengthConstraintDelta(
     glm::dvec2 p, double pmass,
     glm::dvec2 q, double qmass,
     double target_len,
+    double stiffness,
     glm::dvec2* dp,
     glm::dvec2* dq)
 {
-  const auto edge = q-p;
-  const auto edge_len = glm::length(edge);
+  const auto u = q-p;
+  const auto ulen = glm::length(u);
+  const auto C = ulen - target_len;
+  const auto dCdu = u/ulen;
+  const auto dCdp = -dCdu;
+  const auto dCdq = dCdu;
   const double pw = 1/pmass;
   const double qw = 1/qmass;
-  *dp = pw/(pw+qw)*0.5*(1.0 - target_len/edge_len)*edge;
-  *dq = qw/(pw+qw)*0.5*(target_len/edge_len - 1.0)*edge;
+  const auto s = C/(pw*glm::length2(dCdp) + qw*glm::length2(dCdq));
+  *dp = -s*stiffness*pw*dCdp;
+  *dq = -s*stiffness*qw*dCdq;
 }
 
-void GetAngleConstraintDelta(
+void GetBendConstraintDelta(
     glm::dvec2 p, double pmass,
     glm::dvec2 q, double qmass,
     glm::dvec2 r, double rmass,
-    double target_angle,
+    double segment_length,
     double stiffness,
     glm::dvec2* dp,
     glm::dvec2* dq,
     glm::dvec2* dr)
 {
-  const auto edge_l = glm::normalize(q-p);
-  const auto edgelen_l = glm::length(q-p);
-  const auto edge_r = glm::normalize(r-q);
-  const auto edgelen_r = glm::length(r-q);
-  const double angle = glm::angle(edge_l, edge_r);
-  if (glm::abs(angle-target_angle) < 0.01)
+  const auto u = q-p;
+  const auto v = r-q;
+  const glm::dvec2 uperp{u.y, -u.x};
+  const glm::dvec2 vperp{v.y, -v.x};
+  const auto ulen = glm::length(u);
+  const auto vlen = glm::length(v);
+  const auto ub = glm::normalize(u);
+  const auto vb = glm::normalize(v);
+  const auto uperpb = glm::normalize(uperp);
+  const auto vperpb = glm::normalize(vperp);
+  const auto udotv = glm::dot(u,v);
+  const auto udotvperp = glm::dot(u,vperp);
+  if (glm::abs(ulen*vlen+udotv) < 1e-10)
   {
     *dp = {0.0, 0.0};
     *dq = {0.0, 0.0};
     *dr = {0.0, 0.0};
     return;
   }
+  const auto a = 1.0/(ulen*vlen+udotv);
+  const auto dbdu = 2.0*a*vlen*(vperpb - udotvperp*a*(ub+vb));
+  const auto dbdv = -2.0*a*ulen*(uperpb + udotvperp*a*(ub+vb));
+  const auto b = 2.0*udotvperp/(ulen*vlen+udotv)/segment_length;
+  const auto dCdu = 2.0*b*dbdu/segment_length;
+  const auto dCdv = 2.0*b*dbdv/segment_length;
 
-  const double dotprod = glm::dot(edge_l,edge_r);
-  const auto l1 = (edge_r - dotprod*edge_l)/edgelen_l;
-  const auto r1 = (edge_l - dotprod*edge_r)/edgelen_r;
-  const auto l2 = -glm::sqrt(std::max(1e-10,1-dotprod*dotprod))*l1;
-  const auto r2 = -glm::sqrt(std::max(1e-10,1-dotprod*dotprod))*r1;
-  const double pw = 1/pmass;
-  const double qw = 1/pmass;
-  const double rw = 1/pmass;
-  const double s =
-    pw*glm::length2(l1) + qw*glm::length2(l1-r1) + rw*glm::length2(r1);
-
-  *dp = stiffness*0.5*pw*(angle-target_angle)*l2/s;
-  *dq = stiffness*0.5*qw*(angle-target_angle)*(r2-l2)/s;
-  *dr = -stiffness*0.5*rw*(angle-target_angle)*r2/s;
+  const auto dCdp = -dCdu;
+  const auto dCdq = dCdu-dCdv;
+  const auto dCdr = dCdv;
+  const auto C = b*b;
+  if (C < 1e-10)
+  {
+    *dp = {0.0, 0.0};
+    *dq = {0.0, 0.0};
+    *dr = {0.0, 0.0};
+    return;
+  }
+  const auto pw = 1/pmass;
+  const auto qw = 1/qmass;
+  const auto rw = 1/rmass;
+  const auto s = C/(pw*glm::length2(dCdp) +
+                    qw*glm::length2(dCdq) +
+                    rw*glm::length2(dCdr));
+  *dp = -s*stiffness*pw*dCdp;
+  *dq = -s*stiffness*qw*dCdq;
+  *dr = -s*stiffness*rw*dCdr;
 }
 
 }

@@ -9,28 +9,32 @@ void PbdSystem::AddLengthConstraint(
     int idx1,
     int idx2,
     double target_len,
-    int power)
+    double stiffness,
+    int num_iter)
 {
-  length_constraints_.push_back({idx1, idx2, target_len, power});
+  stiffness = glm::clamp(stiffness, 0.0, 1.0);
+  length_constraints_.push_back(
+      {idx1, idx2, target_len, stiffness, num_iter});
 }
 
-void PbdSystem::AddAngleConstraint(
+void PbdSystem::AddBendConstraint(
     int idx1,
     int idx2,
     int idx3,
-    double target_angle,
+    double segment_length,
     double stiffness,
-    int power)
+    int num_iter)
 {
-  angle_constraints_.push_back(
-      {idx1, idx2, idx3, target_angle, stiffness, power});
+  stiffness = glm::clamp(stiffness, 0.0, 1.0);
+  bend_constraints_.push_back(
+      {idx1, idx2, idx3, segment_length, stiffness, num_iter});
 }
 
 void PbdSystem::Integrate(double dt)
 {
   PointCloud::Integrate(dt);
   HandleLengthConstraints(dt);
-  HandleAngleConstraints(dt);
+  HandleBendConstraints(dt);
 }
 
 void PbdSystem::DampVelocity(double damping)
@@ -46,26 +50,28 @@ void PbdSystem::HandleLengthConstraints(double dt)
 {
   for (const auto& c : length_constraints_)
   {
-    for (int i = 0; i < c.power; ++i)
+    for (int i = 0; i < c.num_iter; ++i)
     {
       const auto p = GetPoint(c.idx1);
       const auto q = GetPoint(c.idx2);
       const auto pm = GetMass(c.idx1);
       const auto qm = GetMass(c.idx2);
       const auto target_len = c.target_len;
+      const auto stiffness = c.stiffness;
       glm::dvec2 dp, dq;
-      GetLengthConstraintDelta(p,pm,q,qm,target_len,&dp,&dq);
+      GetLengthConstraintDelta(
+          p,pm,q,qm,target_len,stiffness,&dp,&dq);
       DisplacePointAndUpdateVelocity(c.idx1, dp, dt);
       DisplacePointAndUpdateVelocity(c.idx2, dq, dt);
     }
   }
 }
 
-void PbdSystem::HandleAngleConstraints(double dt)
+void PbdSystem::HandleBendConstraints(double dt)
 {
-  for (const auto& c : angle_constraints_)
+  for (const auto& c : bend_constraints_)
   {
-    for (int i = 0; i < c.power; ++i)
+    for (int i = 0; i < c.num_iter; ++i)
     {
       const auto p = GetPoint(c.idx1);
       const auto q = GetPoint(c.idx2);
@@ -73,12 +79,12 @@ void PbdSystem::HandleAngleConstraints(double dt)
       const auto pm = GetMass(c.idx1);
       const auto qm = GetMass(c.idx2);
       const auto rm = GetMass(c.idx3);
-      const auto target_angle = c.target_angle;
+      const auto segment_length = c.segment_length;
       const auto stiffness = c.stiffness;
       glm::dvec2 dp, dq, dr;
-      GetAngleConstraintDelta(
+      GetBendConstraintDelta(
           p,pm,q,qm,r,rm,
-          target_angle,stiffness,
+          segment_length,stiffness,
           &dp,&dq,&dr);
       DisplacePointAndUpdateVelocity(c.idx1, dp, dt);
       DisplacePointAndUpdateVelocity(c.idx2, dq, dt);

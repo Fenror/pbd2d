@@ -18,35 +18,37 @@ public:
   void Integrate(double dt) override;
   void DampVelocity(double damping);
   void AddLengthConstraint(
-      int idx1, int idx2, double target_len, int power);
-  void AddAngleConstraint(
+      int idx1, int idx2,
+      double target_len, double stiffness, int num_iter);
+  void AddBendConstraint(
       int idx1, int idx2, int idx3,
-      double target_angle, double stiffness, int power);
+      double target_angle, double stiffness, int num_iter);
 
 private:
   void HandleLengthConstraints(double dt);
-  void HandleAngleConstraints(double dt);
+  void HandleBendConstraints(double dt);
 
   struct LengthConstraint
   {
     int idx1;
     int idx2;
     double target_len;
-    int power;
+    double stiffness;
+    int num_iter;
   };
 
-  struct AngleConstraint
+  struct BendConstraint
   {
     int idx1;
     int idx2;
     int idx3;
-    double target_angle;
+    double segment_length;
     double stiffness;
-    int power;
+    int num_iter;
   };
 
   std::vector<LengthConstraint> length_constraints_;
-  std::vector<AngleConstraint> angle_constraints_;
+  std::vector<BendConstraint> bend_constraints_;
 };
 
 }

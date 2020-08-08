@@ -9,7 +9,8 @@ namespace pbd
 {
 
 std::unique_ptr<PbdSystem> MakeRod(
-    double length, double mass, int num_edges, double stiffness);
+    double length, double mass, int num_edges,
+    double stretch_resistance, double bend_resistance);
 
 std::unique_ptr<PbdSystem> MakeSquare(
     double side_length, double stiffness);

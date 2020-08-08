@@ -24,10 +24,10 @@ Sandbox::Sandbox()
   const double rod_len = 0.5;
   const int num_edges = 3;
   const double stiffness = 0.3;
-  const double stretchiness = 1.0;
-  const double bendiness = 1.0;
+  const double stretch_resistance = 1.0;
+  const double bend_resistance = 1.0;
   pbds_.push_back(pbd::MakeRod(
-        rod_len, 0.1, num_edges, stretchiness, bendiness));
+        rod_len, 0.1, num_edges, stretch_resistance, bend_resistance));
   pbds_.push_back(pbd::MakeSquare(0.1, stiffness));
   pbds_[0]->SetGravity({0,-9.82});
   pbds_[1]->SetGravity({0,-9.82});

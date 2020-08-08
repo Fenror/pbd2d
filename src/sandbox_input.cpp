@@ -1,5 +1,6 @@
 #include "sandbox_input.hpp"
 
+#include "camera.hpp"
 #include "sandbox.hpp"
 #include "sandbox_render.hpp"
 
@@ -105,6 +106,12 @@ void MouseMove(Sandbox* s, SDL_Window* w, int x, int y)
   s->SetAttractorPoint(PixelToWorld(*s, w, {x,y}));
 }
 
+void Scroll(Sandbox* s, int y)
+{
+  const auto z = glm::exp(0.1*static_cast<double>(y));
+  s->GetCamera()->Zoom(z);
+}
+
 void EventHandler(Sandbox* s, SDL_Event e)
 {
   switch(e.key.type)
@@ -129,6 +136,11 @@ void EventHandler(Sandbox* s, SDL_Event e)
   }
 
   MouseMove(s, w, e.motion.x, e.motion.y);
+
+  if (e.type == SDL_MOUSEWHEEL)
+  {
+    Scroll(s, e.wheel.y);
+  }
 }
 
 }

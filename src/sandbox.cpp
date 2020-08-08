@@ -1,19 +1,22 @@
 #include "sandbox.hpp"
 
-#include <cstdlib>
-#include <iostream>
-#include <sstream>
-#include <limits>
-#include <SDL2/SDL.h>
-#include <glm/gtc/constants.hpp>
-#include <glm/gtx/norm.hpp>
-
 #include "camera.hpp"
 #include "circle.hpp"
 #include "osksdl.hpp"
 #include "point_cloud.hpp"
 #include "pbd_system.hpp"
 #include "pbd_factory.hpp"
+#include "collisions.hpp"
+
+#include <SDL2/SDL.h>
+#include <glm/gtc/constants.hpp>
+#include <glm/gtx/norm.hpp>
+
+#include <cstdlib>
+#include <iostream>
+#include <sstream>
+#include <limits>
+
 
 namespace sandbox
 {
@@ -21,16 +24,28 @@ namespace sandbox
 Sandbox::Sandbox()
 {
   camera_ = std::make_unique<Camera>();
+
+  //Add rod
   const double rod_len = 0.5;
   const int num_edges = 3;
-  const double stiffness = 0.3;
   const double stretch_resistance = 1.0;
   const double bend_resistance = 1.0;
   pbds_.push_back(pbd::MakeRod(
         rod_len, 0.1, num_edges, stretch_resistance, bend_resistance));
-  pbds_.push_back(pbd::MakeSquare(0.1, stiffness));
   pbds_[0]->SetGravity({0,-9.82});
+
+  //Add square
+  const double stiffness = 0.3;
+  pbds_.push_back(pbd::MakeSquare(0.1, stiffness));
   pbds_[1]->SetGravity({0,-9.82});
+
+  //Add floor
+  const glm::dvec2 normal{0.0, 1.0};
+  const glm::dvec2 center{0.0, 0.0};
+  const double friction_coeff = 0.0;
+  collisions_.AddHalfPlane(normal, center, friction_coeff);
+  collisions_.AddPointCloud(pbds_[0].get());
+  collisions_.AddPointCloud(pbds_[1].get());
 }
 
 Sandbox::~Sandbox() {}
@@ -57,7 +72,7 @@ void Sandbox::UpdateDynamics(double dt)
     for (auto& pbd : pbds_)
       pbd->Integrate(physics_dt_);
 
-    HandleFloorCollisions(physics_dt_);
+    collisions_.ResolveCollisions(physics_dt_);
 
     for (const auto& sel : selections_)
     {
@@ -72,24 +87,6 @@ void Sandbox::UpdateDynamics(double dt)
     cur_phys_time += physics_dt_;
   }
 
-}
-
-void Sandbox::HandleFloorCollisions(double dt)
-{
-  for (auto& pbd : pbds_)
-  {
-    for (int i = 0; i < pbd->GetNumPoints(); ++i)
-    {
-      const auto p = pbd->GetPoint(i);
-      if (p.y < floor_level_)
-      {
-        pbd->DisplacePointAndUpdateVelocity(
-            i, {0.0, floor_level_-p.y}, dt);
-        const auto v = pbd->GetVelocity(i);
-        pbd->SetVelocity(i, {0.0, v.y});
-      }
-    }
-  }
 }
 
 glm::dvec2 Sandbox::GetPoint(int pbd_idx, int point_idx) const

@@ -3,6 +3,8 @@
 
 #include "pbd_system.hpp"
 
+#include "collisions.hpp"
+
 #include <list>
 #include <map>
 #include <memory>
@@ -55,6 +57,7 @@ private:
   double point_radius_ = 0.005;
   double physics_dt_ = 0.01;
   bool running_ = true;
+  pbd::collisions::Collisions collisions_;
 
   //Camera
   bool pan_left_ = false;

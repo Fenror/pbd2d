@@ -8,10 +8,10 @@ class PointCloud
 {
 public:
   PointCloud(int num_points);
-  ~PointCloud();
   virtual void Integrate(double dt);
   void DisplacePoint(int i, glm::dvec2 d);
   void DisplacePointAndUpdateVelocity(int i, glm::dvec2 d, double dt);
+  void DisplaceCloud(glm::dvec2 d);
   void AddVelocity(int i, glm::dvec2 v);
   void AddForce(int i, glm::dvec2 F);
   void SetGravity(glm::dvec2 g);
@@ -28,6 +28,8 @@ public:
   glm::dvec2 GetVelocity(int i) const;
   void SetVelocity(int i, glm::dvec2 v);
   void SetMass(int i, double m);
+  void SetRadii(double r);
+  double GetRadius(int i) const;
   double GetMass(int i) const;
   void SetForce(int i, glm::dvec2 F);
   glm::dvec2 GetCenterOfMass() const;
@@ -39,6 +41,7 @@ private:
   std::vector<glm::dvec2> velocities_;
   std::vector<glm::dvec2> forces_;
   std::vector<double> masses_;
+  std::vector<double> radii_;
   glm::dvec2 gravity_{0.0,0.0};
 };
 

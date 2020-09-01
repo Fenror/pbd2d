@@ -43,19 +43,27 @@ public:
   const auto& GetSelections() const { return selections_; }
   void SelectPoint(int pbd_idx, int point_idx, Selection type);
   void SetAttractorPoint(glm::dvec2 p);
+  void SetRepellerPoint(glm::dvec2 p);
   void DeselectAll();
+  void SpawnSquare(glm::dvec2 pos);
+  void SpawnRod(glm::dvec2 pos);
+  void EnableRepel();
+  void DisableRepel();
 
 private:
   void HandleFloorCollisions(double dt);
+  void SetRepellerForces();
   std::unique_ptr<Camera> camera_;
   std::vector<std::unique_ptr<pbd::PbdSystem>> pbds_;
   std::map<std::pair<int,int>, Selection> selections_;
 
   glm::dvec2 attractor_point_;
+  glm::dvec2 repeller_point_{0.0, 0.0};
+  bool repel_ = false;
   double floor_level_ = 0.0;
   double time_accumulator_ = 0.0;
   double point_radius_ = 0.01;
-  double physics_dt_ = 0.001;
+  double physics_dt_ = 0.01;
   bool running_ = true;
   pbd::collisions::Collisions collisions_;
 

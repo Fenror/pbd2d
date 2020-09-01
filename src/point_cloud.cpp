@@ -3,9 +3,11 @@
 PointCloud::PointCloud(int num_points)
   : num_points_(num_points)
   , points_(num_points)
+  , points_from_prev_timestep_(num_points)
   , velocities_(num_points)
   , forces_(num_points)
   , masses_(num_points)
+  , radii_(num_points)
 {
   for (int i = 0; i < num_points_; ++i)
   {
@@ -13,12 +15,11 @@ PointCloud::PointCloud(int num_points)
     velocities_[i] = {0.0, 0.0};
     forces_[i] = {0.0, 0.0};
     masses_[i] = 1.0;
+    radii_[i] = 0.01;
   }
 
   points_from_prev_timestep_ = points_;
 }
-
-PointCloud::~PointCloud() {}
 
 void PointCloud::Integrate(double dt)
 {
@@ -42,6 +43,14 @@ void PointCloud::DisplacePointAndUpdateVelocity(
   velocities_[i] += d/dt;
 }
 
+void PointCloud::DisplaceCloud(glm::dvec2 d)
+{
+  for (int i = 0; i < num_points_; ++i)
+  {
+    DisplacePoint(i, d);
+  }
+}
+
 void PointCloud::AddVelocity(int i, glm::dvec2 v)
 {
   velocities_[i] += v;
@@ -60,17 +69,20 @@ void PointCloud::SetGravity(glm::dvec2 g)
 void PointCloud::SpawnNewPoints(std::vector<glm::dvec2> v)
 {
   points_ = v;
+  points_from_prev_timestep_ = v;
   num_points_ = v.size();
 
   velocities_.resize(num_points_);
   forces_.resize(num_points_);
   masses_.resize(num_points_);
+  radii_.resize(num_points_);
 
   for (int i = 0; i < num_points_; ++i)
   {
     velocities_[i] = {0.0, 0.0};
     forces_[i] = {0.0, 0.0};
     masses_[i] = 1.0;
+    radii_[i] = 0.01;
   }
 }
 
@@ -78,9 +90,11 @@ void PointCloud::RemoveAllPoints()
 {
   num_points_ = 0;
   points_.resize(0);
+  points_from_prev_timestep_.resize(0);
   velocities_.resize(0);
   forces_.resize(0);
   masses_.resize(0);
+  radii_.resize(0);
 }
 
 //setters & getters
@@ -127,6 +141,16 @@ void PointCloud::SetMass(int i, double m)
 double PointCloud::GetMass(int i) const
 {
   return masses_[i];
+}
+
+void PointCloud::SetRadii(double r)
+{
+  std::fill(radii_.begin(), radii_.end(), r);
+}
+
+double PointCloud::GetRadius(int i) const
+{
+  return radii_[i];
 }
 
 void PointCloud::SetForce(int i, glm::dvec2 F)

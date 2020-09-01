@@ -15,6 +15,19 @@ void Collisions::AddPointCloud(PointCloud* pc)
   point_clouds_.push_back(pc);
 }
 
+void Collisions::AddRod(PointCloud *pc)
+{
+  for (int i = 0; i < pc->GetNumPoints()-1; ++i)
+  {
+    const double friction_coefficient = 0.0;
+    AddLineSeg(pc, i, i+1, friction_coefficient);
+  }
+  for (int i = 0; i < pc->GetNumPoints(); ++i)
+  {
+    AddPoint(pc, i);
+  }
+}
+
 void Collisions::AddHalfPlane(
     glm::dvec2 normal, glm::dvec2 center, double friction_coefficient)
 {
@@ -28,15 +41,16 @@ void Collisions::AddLineSeg(PointCloud* pc, int idx1, int idx2,
   line_segs_.push_back({pc, idx1, idx2, friction_coefficient});
 }
 
-void Collisions::AddPoint(PointCloud* pc, int idx, double radius)
+void Collisions::AddPoint(PointCloud* pc, int idx)
 {
-  points_.push_back({pc, idx, radius});
+  points_.push_back({pc, idx});
 }
 
 void Collisions::ResolveCollisions(double dt)
 {
   ResolveAllPointLineSegCollisions(dt);
   ResolveAllHalfPlaneCollisions(dt);
+  ResolveAllPolygonPointCollisions(dt);
 }
 
 void Collisions::ResolveAllHalfPlaneCollisions(double dt)
@@ -59,27 +73,27 @@ void Collisions::ResolveAllPointLineSegCollisions(double dt)
       if (pt.pc == l.pc)
         continue;
 
-      const auto p_prev = pt.pc->GetPointFromPreviousTimestep(pt.idx);
       const auto p = pt.pc->GetPoint(pt.idx);
-      const auto pmass = pt.pc->GetMass(pt.idx);
       const auto q1 = l.pc->GetPoint(l.idx1);
       const auto q2 = l.pc->GetPoint(l.idx2);
-      const auto q1mass = l.pc->GetMass(l.idx1);
-      const auto q2mass = l.pc->GetMass(l.idx2);
       const auto d = geometry::PointLinesegDistance(p,q1,q2);
+      const auto r = pt.pc->GetRadius(pt.idx);
 
-      if (glm::abs(d-pt.radius) < 0.01*pt.radius)
+      if (glm::abs(d-r) < 0.01*r)
         continue;
 
-      if (d < pt.radius)
+      if (d < r)
       {
+        const auto pmass = pt.pc->GetMass(pt.idx);
+        const auto q1mass = l.pc->GetMass(l.idx1);
+        const auto q2mass = l.pc->GetMass(l.idx2);
         const glm::dvec2 tangent = glm::normalize(q2-q1);
         const glm::dvec2 proj = glm::dot(p-q1,tangent)*tangent;
         const glm::dvec2 dir = glm::normalize(p-q1-proj);
         const double total_mass = pmass+q1mass+q2mass;
         const double pw = pmass/total_mass;
         const double qw = (q1mass+q2mass)/total_mass;
-        const double len = pt.radius-d;
+        const double len = r-d;
         const auto dp = pw*len*dir;
         const auto dq1 = -qw*len*dir;
         const auto dq2 = -qw*len*dir;
@@ -92,9 +106,47 @@ void Collisions::ResolveAllPointLineSegCollisions(double dt)
         pt.pc->SetVelocity(pt.idx, new_vel);
         l.pc->SetVelocity(l.idx1, new_vel);
         l.pc->SetVelocity(l.idx2, new_vel);
+        continue;
+      }
+
+      const auto p_old = pt.pc->GetPointFromPreviousTimestep(pt.idx);
+      glm::dvec2 intersec;
+      const auto tunneled = geometry::LinesegLinesegIntersection(
+          p_old, p, q1, q2, &intersec);
+
+      if (tunneled)
+      {
+        pt.pc->DisplacePointAndUpdateVelocity(
+            pt.idx, 2.0*(intersec-p), dt);
       }
     }
   }
+}
+
+void Collisions::ResolveAllPolygonPointCollisions(double dt)
+{
+  for (const auto& poly : polygons_)
+  {
+    for (const auto& point : points_)
+    {
+      if (poly.pc == point.pc)
+      {
+        continue;
+      }
+      ResolvePolygonPointCollision(poly, point, dt);
+    }
+  }
+}
+
+void Collisions::AddPolygon(PointCloud *pc)
+{
+  std::vector<LineSeg> sides;
+  const auto num_points = pc->GetNumPoints();
+  for (int i = 0; i < num_points; ++i)
+  {
+    sides.push_back({pc, i, (i+1)%num_points, 0.0});
+  }
+  polygons_.push_back({pc, sides});
 }
 
 bool DetectContinuousPointLineSegCollision(
@@ -140,6 +192,72 @@ void ResolvePointLineSegCollision(
   *dp = pw*dir;
   *dq1 = -qw*dir;
   *dq2 = -qw*dir;
+}
+
+void ResolvePolygonPointCollision(
+    Polygon poly,
+    Point point,
+    double dt)
+{
+  const glm::dvec2 ray_dir{1.0, 0.0};
+
+  int num_intersections = 0;
+  const auto p = point.pc->GetPoint(point.idx);
+  for (const auto& l : poly.line_segments)
+  {
+    glm::dvec2 intersec;
+    const auto q1 = l.pc->GetPoint(l.idx1);
+    const auto q2 = l.pc->GetPoint(l.idx2);
+    const auto hit = geometry::RayLinesegIntersection(
+        p, ray_dir, q1, q2, &intersec);
+
+    if (hit)
+    {
+      num_intersections += 1;
+    }
+  }
+
+  if (num_intersections % 2 == 1)
+  {
+    const auto& l0 = poly.line_segments[0];
+    const auto q1 = l0.pc->GetPoint(l0.idx1);
+    const auto q2 = l0.pc->GetPoint(l0.idx2);
+    const auto smallest_dist = geometry::PointLinesegDistance(p, q1, q2);
+    glm::dvec2 cp;
+    int closest_idx = 0;
+
+    for (int i = 0; i < poly.line_segments.size(); ++i)
+    {
+      glm::dvec2 intersec;
+      const auto& l = poly.line_segments[i];
+      const auto q1 = l.pc->GetPoint(l.idx1);
+      const auto q2 = l.pc->GetPoint(l.idx2);
+      const auto d = geometry::PointLinesegDistance(
+          p, q1, q2, &intersec);
+
+      if (d <= smallest_dist)
+      {
+        closest_idx = i;
+        cp = intersec;
+      }
+    }
+
+    const auto& cl = poly.line_segments[closest_idx];
+    const auto dir = cp - p;
+    const auto pmass = point.pc->GetMass(point.idx);
+    const auto q1mass = cl.pc->GetMass(cl.idx1);
+    const auto q2mass = cl.pc->GetMass(cl.idx2);
+    const double total_mass = pmass+q1mass+q2mass;
+    const double pw = pmass/total_mass;
+    const double qw = q1mass+q2mass/total_mass;
+    const auto dp = pw*dir;
+    const auto dq1 = -qw*dir;
+    const auto dq2 = -qw*dir;
+    point.pc->DisplacePointAndUpdateVelocity(point.idx, dp, dt);
+    cl.pc->DisplacePointAndUpdateVelocity(cl.idx1, dq1, dt);
+    cl.pc->DisplacePointAndUpdateVelocity(cl.idx2, dq2, dt);
+  }
+
 }
 
 }

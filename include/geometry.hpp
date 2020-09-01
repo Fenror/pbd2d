@@ -33,6 +33,13 @@ double PointLineSignedDistance(
     const glm::dvec2& point_on_line,
     const glm::dvec2& normal);
 
+bool RayLinesegIntersection(
+    const glm::dvec2& ray_origin,
+    const glm::dvec2& ray_direction,
+    const glm::dvec2& p1,
+    const glm::dvec2& p2,
+    glm::dvec2* intersection_point);
+
 double Cross(
     const glm::dvec2& u,
     const glm::dvec2& v);

@@ -7,8 +7,9 @@
 namespace sandbox
 {
 
-void KeyDown(Sandbox* s, SDL_Keycode sym)
+void KeyDown(Sandbox* s, SDL_Event e, glm::dvec2 cursor)
 {
+  const auto sym = e.key.keysym.sym;
   switch (sym)
   {
     case SDLK_q:
@@ -26,11 +27,22 @@ void KeyDown(Sandbox* s, SDL_Keycode sym)
     case SDLK_s:
       s->Pan(Direction::Down, true);
       break;
+    case SDLK_c:
+      s->SpawnSquare(cursor);
+      break;
+    case SDLK_r:
+      s->SpawnRod(cursor);
+      break;
+    case SDLK_f:
+      s->SetRepellerPoint(cursor);
+      s->EnableRepel();
+      break;
   }
 }
 
-void KeyUp(Sandbox* s, SDL_Keycode sym)
+void KeyUp(Sandbox* s, SDL_Event e, glm::dvec2 cursor)
 {
+  const auto sym = e.key.keysym.sym;
   switch (sym)
   {
     case SDLK_q:
@@ -47,6 +59,9 @@ void KeyUp(Sandbox* s, SDL_Keycode sym)
       break;
     case SDLK_s:
       s->Pan(Direction::Down, false);
+      break;
+    case SDLK_f:
+      s->DisableRepel();
       break;
   }
 }
@@ -99,6 +114,7 @@ void MouseDown(Sandbox* s, SDL_Window* w, int x, int y)
 void MouseUp(Sandbox* s)
 {
   s->DeselectAll();
+  s->DisableRepel();
 }
 
 void MouseMove(Sandbox* s, SDL_Window* w, int x, int y)
@@ -114,24 +130,27 @@ void Scroll(Sandbox* s, int y)
 
 void EventHandler(Sandbox* s, SDL_Event e)
 {
+  const auto w = SDL_GetWindowFromID(e.button.windowID);
+  int mouse_x, mouse_y;
+  SDL_GetMouseState(&mouse_x, &mouse_y);
+  const auto cursor_world_pos = PixelToWorld(*s, w, {mouse_x,mouse_y});
   switch(e.key.type)
   {
     case SDL_KEYDOWN:
-      KeyDown(s, e.key.keysym.sym);
+      KeyDown(s, e, cursor_world_pos);
       break;
     case SDL_KEYUP:
-      KeyUp(s, e.key.keysym.sym);
+      KeyUp(s, e, cursor_world_pos);
       break;
   }
 
-  const auto w = SDL_GetWindowFromID(e.button.windowID);
   switch(e.button.type)
   {
     case SDL_MOUSEBUTTONDOWN:
       MouseDown(s, w, e.button.x, e.button.y);
       break;
     case SDL_MOUSEBUTTONUP:
-      s->DeselectAll();
+      MouseUp(s);
       break;
   }
 

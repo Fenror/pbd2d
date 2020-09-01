@@ -25,48 +25,11 @@ Sandbox::Sandbox()
 {
   camera_ = std::make_unique<Camera>();
 
-  //Add rod
-  const double rod_len = 0.5;
-  const int num_edges = 4;
-  const double stretch_resistance = 1.0;
-  const double bend_resistance = 1.0;
-  pbds_.push_back(pbd::MakeRod(
-        rod_len, 0.1, num_edges, stretch_resistance, bend_resistance));
-  pbds_[0]->SetGravity({0,-9.82});
-
-  //Add square
-  const double stiffness = 1.0;
-  pbds_.push_back(pbd::MakeSquare(0.1, stiffness));
-  pbds_[1]->SetGravity({0,-9.82});
-
   //Add floor
   const glm::dvec2 normal{0.0, 1.0};
   const glm::dvec2 center{0.0, 0.0};
   const double friction_coeff = 0.0;
   collisions_.AddHalfPlane(normal, center, friction_coeff);
-  collisions_.AddPointCloud(pbds_[0].get());
-  collisions_.AddPointCloud(pbds_[1].get());
-
-
-  //Add collidables
-  collisions_.AddPoint(pbds_[1].get(), 0, point_radius_);
-  collisions_.AddPoint(pbds_[1].get(), 1, point_radius_);
-  collisions_.AddPoint(pbds_[1].get(), 2, point_radius_);
-  collisions_.AddPoint(pbds_[1].get(), 3, point_radius_);
-  collisions_.AddLineSeg(pbds_[1].get(), 0, 1, 0.0);
-  collisions_.AddLineSeg(pbds_[1].get(), 1, 2, 0.0);
-  collisions_.AddLineSeg(pbds_[1].get(), 2, 3, 0.0);
-  collisions_.AddLineSeg(pbds_[1].get(), 3, 4, 0.0);
-
-  collisions_.AddPoint(pbds_[0].get(), 0, point_radius_);
-  collisions_.AddPoint(pbds_[0].get(), 1, point_radius_);
-  collisions_.AddPoint(pbds_[0].get(), 2, point_radius_);
-  collisions_.AddPoint(pbds_[0].get(), 3, point_radius_);
-  collisions_.AddPoint(pbds_[0].get(), 4, point_radius_);
-  collisions_.AddLineSeg(pbds_[0].get(), 0, 1, 0.0);
-  collisions_.AddLineSeg(pbds_[0].get(), 1, 2, 0.0);
-  collisions_.AddLineSeg(pbds_[0].get(), 2, 3, 0.0);
-  collisions_.AddLineSeg(pbds_[0].get(), 3, 4, 0.0);
 }
 
 Sandbox::~Sandbox() {}
@@ -105,6 +68,11 @@ void Sandbox::UpdateDynamics(double dt)
           point_idx, d, physics_dt_);
     }
 
+    if (repel_)
+    {
+      SetRepellerForces();
+    }
+
     cur_phys_time += physics_dt_;
   }
 
@@ -137,6 +105,11 @@ void Sandbox::DeselectAll()
 void Sandbox::SetAttractorPoint(glm::dvec2 p)
 {
   attractor_point_ = p;
+}
+
+void Sandbox::SetRepellerPoint(glm::dvec2 p)
+{
+  repeller_point_ = p;
 }
 
 void Sandbox::Pan(Direction d, bool onoff)
@@ -175,6 +148,65 @@ glm::dvec2 Sandbox::GetPanDirection()
     dir += glm::dvec2{1.0, 0.0};
 
   return dir;
+}
+
+void Sandbox::SpawnSquare(glm::dvec2 pos)
+{
+  const double stiffness = 0.4;
+  const double side_length = 0.1;
+  pbds_.push_back(pbd::MakeSquare(side_length, stiffness));
+  const auto p = pbds_.back()->GetPoint(0);
+  pbds_.back()->DisplaceCloud(pos-p);
+  pbds_.back()->SetGravity({0,-9.82});
+  pbds_.back()->SetRadii(point_radius_);
+  collisions_.AddPointCloud(pbds_.back().get());
+}
+
+void Sandbox::SpawnRod(glm::dvec2 pos)
+{
+  const double rod_len = 0.5;
+  const int num_edges = 50;
+  const double stretch_resistance = 1.0;
+  const double bend_resistance = 1.0;
+  const double mass = 0.01;
+  pbds_.push_back(pbd::MakeRod(
+        rod_len, mass, num_edges,
+        stretch_resistance, bend_resistance));
+  const auto p = pbds_.back()->GetPoint(0);
+  pbds_.back()->DisplaceCloud(pos-p);
+  pbds_.back()->SetGravity({0,-9.82});
+  pbds_.back()->SetRadii(point_radius_);
+  collisions_.AddPointCloud(pbds_.back().get());
+}
+
+void Sandbox::SetRepellerForces()
+{
+  for (const auto& pbd : pbds_)
+  {
+    for (int i = 0; i < pbd->GetNumPoints(); ++i)
+    {
+      const auto p = pbd->GetPoint(i);
+      const auto d = glm::length2(p-repeller_point_);
+      pbd->SetForce(i, 50.0*(p-repeller_point_)/d);
+    }
+  }
+}
+
+void Sandbox::EnableRepel()
+{
+  repel_ = true;
+}
+
+void Sandbox::DisableRepel()
+{
+  repel_ = false;
+  for (const auto& pbd : pbds_)
+  {
+    for (int i = 0; i < pbd->GetNumPoints(); ++i)
+    {
+      pbd->SetForce(i, {0.0, 0.0});
+    }
+  }
 }
 
 }

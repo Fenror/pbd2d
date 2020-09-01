@@ -77,4 +77,34 @@ double Cross(
 {
   return u.x*v.y - u.y*v.x;
 }
+
+bool RayLinesegIntersection(
+    const glm::dvec2& ray_origin,
+    const glm::dvec2& ray_direction,
+    const glm::dvec2& p1,
+    const glm::dvec2& p2,
+    glm::dvec2* intersection_point)
+{
+  const auto v1 = ray_origin - p1;
+  const auto v2 = p2 - p1;
+  const glm::dvec2 v3{-ray_direction.y, ray_direction.x};
+  const auto dot = glm::dot(v2,v3);
+
+  if (glm::abs(dot) < 1e-10)
+  {
+    return false;
+  }
+
+  const auto t1 = Cross(v2, v1) / dot;
+  const auto t2 = glm::dot(v1,v3) / dot;
+
+  if (t1 >= 0.0 && t2 >= 0.0 && t2 <= 1.0)
+  {
+    *intersection_point = ray_origin + t1*ray_direction;
+    return true;
+  }
+
+  return false;
+}
+
 }
